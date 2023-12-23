@@ -4,25 +4,40 @@ import (
     "fmt"
     "time"
 
+    "fyne.io/fyne/v2"
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/container"
     "fyne.io/fyne/v2/widget"
     "github.com/shirou/gopsutil/cpu"
+
+    "bufio"
+    "os"
+    "strings"
+    "strconv"
 )
 
 func main() {
     myApp := app.New()
-    myWindow := myApp.NewWindow("CPU Info")
+    myWindow := myApp.NewWindow("Cycles")
 
-    // Initialize UI components
-    cpuInfo := widget.NewLabel("Getting CPU info...")
-    content := container.NewVBox(cpuInfo)
-    myWindow.SetContent(content)
+    // Determine the number of CPU cores
+    numCores, _ := cpu.Counts(true) // True because we want logical and physical
+    tiles := make([]*CoreTile, numCores)
+
+    // Create a grid container
+    grid := container.NewGridWithColumns(4) // Adjust number of columns as needed
+
+    for i := 0; i < numCores; i++ {
+        tiles[i] = NewCoreTile()
+        grid.Add(tiles[i].GetContainer())
+    }
+
+    myWindow.SetContent(grid)
 
     // Update CPU info periodically
     go func() {
         for {
-            updateCPUInfo(cpuInfo)
+            updateCPUInfo(tiles)
             time.Sleep(2 * time.Second)
         }
     }()
@@ -30,24 +45,62 @@ func main() {
     myWindow.ShowAndRun()
 }
 
-func updateCPUInfo(label *widget.Label) {
+
+func updateCPUInfo(tiles []*CoreTile) {
     percent, err := cpu.Percent(0, true)
     if err != nil {
-        label.SetText(fmt.Sprintf("Error getting CPU info: %s", err))
         return
     }
 
-    freq, err := cpu.Info()
+    // Read current frequency from /proc/cpuinfo
+    file, err := os.Open("/proc/cpuinfo")
     if err != nil {
-        label.SetText(fmt.Sprintf("Error getting CPU frequency: %s", err))
         return
     }
+    defer file.Close()
 
-    info := "CPU Cores:\n"
-    for i, p := range percent {
-        info += fmt.Sprintf("Core %d: %.2f%%, %.2f MHz\n", i, p, freq[i].Mhz)
+    scanner := bufio.NewScanner(file)
+    var freqs []float64
+    for scanner.Scan() {
+        line := scanner.Text()
+        if strings.HasPrefix(line, "cpu MHz") {
+            parts := strings.Split(line, ":")
+            if len(parts) == 2 {
+                freq, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
+                if err == nil {
+                    freqs = append(freqs, freq)
+                }
+            }
+        }
     }
 
-    label.SetText(info)
+    for i, tile := range tiles {
+        // Assuming freqs and percent are fetched as before
+        tile.CoreLabel.SetText(fmt.Sprintf("Core #%d", i))
+        tile.UtilLabel.SetText(fmt.Sprintf("Util: %.2f%%", percent[i]))
+        tile.ClockLabel.SetText(fmt.Sprintf("Clock: %.2f MHz", freqs[i]))
+    }
 }
+
+
+type CoreTile struct {
+    CoreLabel    *widget.Label
+    UtilLabel    *widget.Label
+    ClockLabel   *widget.Label
+}
+
+func NewCoreTile() *CoreTile {
+    return &CoreTile{
+        CoreLabel:  widget.NewLabel("Core #"),
+        UtilLabel:  widget.NewLabel("Util %"),
+        ClockLabel: widget.NewLabel("Clock MHz"),
+    }
+}
+
+func (t *CoreTile) GetContainer() fyne.CanvasObject {
+    return container.NewVBox(t.CoreLabel, t.UtilLabel, t.ClockLabel)
+}
+
+
+
 
