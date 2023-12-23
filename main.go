@@ -8,6 +8,8 @@ import (
     "fyne.io/fyne/v2/app"
     "fyne.io/fyne/v2/container"
     "fyne.io/fyne/v2/widget"
+    "fyne.io/fyne/v2/canvas"
+    "fyne.io/fyne/v2/theme"
     "github.com/shirou/gopsutil/cpu"
 
     "bufio"
@@ -18,7 +20,14 @@ import (
 
 func main() {
     myApp := app.New()
+
+    icon, err := fyne.LoadResourceFromPath("icon.png")
+    if err != nil {
+        //log.Fatal("Could not load icon:", err)
+    }
+
     myWindow := myApp.NewWindow("Cycles")
+    myWindow.SetIcon(icon)
 
     // Determine the number of CPU cores
     numCores, _ := cpu.Counts(true) // True because we want logical and physical
@@ -84,23 +93,36 @@ func updateCPUInfo(tiles []*CoreTile) {
 
 
 type CoreTile struct {
-    CoreLabel    *widget.Label
-    UtilLabel    *widget.Label
-    ClockLabel   *widget.Label
+    CoreLabel  *widget.Label
+    UtilLabel  *widget.Label
+    ClockLabel *widget.Label
+    container  *fyne.Container
 }
 
 func NewCoreTile() *CoreTile {
+    coreLabel := widget.NewLabel("Core #")
+    utilLabel := widget.NewLabel("Util %")
+    clockLabel := widget.NewLabel("Clock MHz")
+
+    // Create a background rectangle with rounded corners
+    bg := canvas.NewRectangle(theme.BackgroundColor())
+    bg.SetMinSize(fyne.NewSize(100, 100)) // Set the size as needed
+    bg.FillColor = theme.BackgroundColor()
+    bg.StrokeColor = theme.ShadowColor()
+    bg.StrokeWidth = 1
+    bg.CornerRadius = 10
+
+    // Use a container to overlay the labels on the background
+    container := container.NewMax(bg, container.NewVBox(coreLabel, utilLabel, clockLabel))
+
     return &CoreTile{
-        CoreLabel:  widget.NewLabel("Core #"),
-        UtilLabel:  widget.NewLabel("Util %"),
-        ClockLabel: widget.NewLabel("Clock MHz"),
+        CoreLabel:  coreLabel,
+        UtilLabel:  utilLabel,
+        ClockLabel: clockLabel,
+        container:  container,
     }
 }
 
 func (t *CoreTile) GetContainer() fyne.CanvasObject {
-    return container.NewVBox(t.CoreLabel, t.UtilLabel, t.ClockLabel)
+    return t.container
 }
-
-
-
-
