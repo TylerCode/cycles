@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Cycles
+Exec=tylercode-cycles
+Icon=${SNAP}/meta/gui/icon.png
+Type=Application
+Categories=Utility;
