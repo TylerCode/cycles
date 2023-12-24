@@ -22,7 +22,7 @@ This application provides a real-time graphical representation of CPU utilizatio
 
 ## Installation
 
-Snap package coming soon...
+Snap package and github release coming soon...
 
 To set up the project on your local machine:
 
