@@ -4,6 +4,9 @@ Desktop CPU Monitor I threw together while trying to debug some issues with my c
 ## Overview
 This application provides a real-time graphical representation of CPU utilization for each core, including those with hyperthreading. It displays the utilization percentage and frequency of each core in a grid layout, with each core represented as a tile. The application also includes a history graph for the last 20 measurements of CPU utilization for each core.
 
+![image](https://github.com/TylerCode/cycles/assets/18288340/e768eee2-d7c8-407a-b680-229ee16a093a)
+
+
 ## Features
 - Displays CPU core utilization and frequency.
 - Real-time updates for each CPU core.
