@@ -113,6 +113,13 @@ func drawGraph(img *canvas.Image, data []float64) {
 	// Clear the image
 	draw.Draw(dst, dst.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 0}}, image.ZP, draw.Src)
 
+	// Draw the box around the graph
+	borderColor := color.RGBA{128, 128, 128, 255}              // Grey color
+	drawLine(dst, 0, 0, width-1, 0, borderColor)               // Top border
+	drawLine(dst, 0, height-1, width-1, height-1, borderColor) // Bottom border
+	drawLine(dst, 0, 0, 0, height-1, borderColor)              // Left border
+	drawLine(dst, width-1, 0, width-1, height-1, borderColor)  // Right border
+
 	// Check if there's data to draw
 	if len(data) < 2 {
 		img.Image = dst
@@ -130,7 +137,7 @@ func drawGraph(img *canvas.Image, data []float64) {
 		x2 := (i + 1) * step
 		y2 := height - int(data[i+1]/100*float64(height))
 
-		drawLine(dst, x1, y1, x2, y2, color.RGBA{255, 0, 0, 255}) // Red line
+		drawLine(dst, x1, y1, x2, y2, color.RGBA{255, 0, 0, 255}) // Red line for the graph
 	}
 
 	img.Image = dst
