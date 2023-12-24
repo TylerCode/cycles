@@ -1,5 +1,5 @@
 # cycles
-Desktop CPU Monitor
+Desktop CPU Monitor I threw together while trying to debug some issues with my computer. 
 
 ## Overview
 This application provides a real-time graphical representation of CPU utilization for each core, including those with hyperthreading. It displays the utilization percentage and frequency of each core in a grid layout, with each core represented as a tile. The application also includes a history graph for the last 20 measurements of CPU utilization for each core.
