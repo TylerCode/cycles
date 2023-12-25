@@ -17,18 +17,37 @@ The ultimate goal is to have something more akin to the performance tab in Windo
 - Graphical representation of CPU utilization history for the last 20 measurements.
 - Customizable UI with system color scheme compatibility.
 
-## Prerequisites
+## Installation
+
+Option 1: 
+- Download the latest release on the github release page. [Found here...](https://github.com/TylerCode/cycles/releases)
+- Download the "cycles" file or the entire zip
+- Make it executable if it isn't already
+```
+chmod +x cycles
+```
+- Run it! (double click or `./cycles`)
+
+Option 2:
+- Wait for snap package
+
+Option 3:
+- Build it yourself!
+
+
+## Contributing
+
+### Prerequisites
 - Go (Golang) installed on your system.
 - Fyne library for UI development in Go.
 - `gopsutil` library for accessing system information.
 
-## Installation
 
-Snap package and github release coming soon...
+### Setup
 
 To set up the project on your local machine:
 
-1. Clone the repository:
+1. Clone the repository (I would make a fork and clone that but to play around):
 ```
 git clone https://github.com/TylerCode/cycles
 ```
@@ -38,22 +57,8 @@ go get fyne.io/fyne/v2
 go get github.com/shirou/gopsutil/cpu
 ```
 
-## Usage
-To run the application:
-```
-go run main.go
-```
+### Contrib Notes
 
-
-Alternatively, you can build an executable:
-
-```
-go build
-./cycles
-```
-
-
-## Contributing
 Contributions to this project are welcome! Please follow these steps:
 
 1. Fork the repository.
