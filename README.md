@@ -31,7 +31,7 @@ chmod +x cycles
 - Run it! (double click or `./cycles`)
 
 Option 2:
-- Wait for snap package
+- Wait for snap package ¯\_(ツ)_/¯
 
 Option 3:
 - Build it yourself!
