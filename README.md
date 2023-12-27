@@ -9,7 +9,6 @@ This application provides a real-time graphical representation of CPU utilizatio
 
 The ultimate goal is to have something more akin to the performance tab in Windows Task Manager. 
 
-![image](https://github.com/TylerCode/cycles/assets/18288340/e768eee2-d7c8-407a-b680-229ee16a093a)
 ![image](https://github.com/TylerCode/cycles/assets/18288340/460582ca-6260-4148-a19a-587ae03dc87f)
 
 
