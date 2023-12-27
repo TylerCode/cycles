@@ -1,11 +1,11 @@
 name: tylercode-cycles
-version: '0.2'
+version: '0.3.0'
 summary: A simple, theme aware, cpu information tool
 description: |
   This application displays all logical cores on the machine and the current clock speed and core utilization. The theme is controlled by the OS. 
 icon: snap/gui/icon.png
 
-grade: devel
+grade: stable
 confinement: classic
 
 base: core18
