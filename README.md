@@ -1,6 +1,9 @@
 # cycles
 Desktop CPU Monitor I threw together while trying to debug some issues with my computer. 
 
+![image](https://github.com/TylerCode/cycles/assets/18288340/36332a79-6882-4204-ba6d-51d061798229)
+
+
 ## Overview
 This application provides a real-time graphical representation of CPU utilization for each logical core. It displays the utilization percentage and frequency of each core with history going back 20 measurements. 
 
