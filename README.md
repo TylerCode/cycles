@@ -31,10 +31,20 @@ chmod +x cycles
 - Run it! (double click or `./cycles`)
 
 Option 2:
-- Wait for snap package `¯\_(ツ)_/¯`
+- Install the snap package with
+```bash
+sudo snap install tylercode-cycles --candidate
+```
+- A "Release" build will be out once I've tested it on a few other machines.
 
 Option 3:
-- Build it yourself!
+- Wait for Flatpak
+
+Option 4:
+- Wait for AppImage
+
+Option 5:
+- Build it yourself
 
 
 ## Contributing
