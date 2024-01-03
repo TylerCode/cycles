@@ -1,26 +1,35 @@
 name: tylercode-cycles
-version: '0.3.0'
-summary: A simple, theme aware, cpu information tool
+version: '0.3.1'
+summary: A simple, theme-aware, CPU information tool
 description: |
-  This application displays all logical cores on the machine and the current clock speed and core utilization. The theme is controlled by the OS. 
+  This application displays all logical cores on the machine and the current clock speed and core utilization. The theme is controlled by the OS.
 icon: snap/gui/icon.png
 
 grade: stable
-confinement: classic
+confinement: strict
 
-base: core18
+base: core20
 
 apps:
   tylercode-cycles:
     command: bin/cycles
+    plugs:
+      - desktop
+      - desktop-legacy
+      - x11
+      - home
+      - wayland
+      - unity7
+      - pulseaudio
+      - opengl
 
 parts:
   tylercode-cycles:
     source: .
     plugin: go
-    go-importpath: "github.com/TylerCode/cycles"
     build-packages:
       - libgl1-mesa-dev
+      - libgl1-mesa-glx
       - libx11-dev
       - libxrandr-dev
       - libxinerama-dev
@@ -30,7 +39,13 @@ parts:
     stage-packages:
       - libgl1-mesa-glx
       - libx11-6
-      - libxrandr2
       - libxinerama1
+      - libxxf86vm-dev
+      - libglu1-mesa
+      - libgles2-mesa
       - libxcursor1
       - libxi6
+      - libxrandr2
+      - libxrender1
+      - libasound2
+      - libpulse0
