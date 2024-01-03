@@ -1,5 +1,5 @@
 name: tylercode-cycles
-version: '0.3.1'
+version: '0.3.2'
 summary: A simple, theme-aware, CPU information tool
 description: |
   This application displays all logical cores on the machine and the current clock speed and core utilization. The theme is controlled by the OS.
@@ -61,6 +61,7 @@ parts:
       - libxrandr-dev
       - libxinerama-dev
       - libxcursor-dev
+      - libxxf86vm-dev
       - libxi-dev
       - pkg-config
     stage-packages:
