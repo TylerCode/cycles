@@ -137,7 +137,13 @@ func drawGraph(img *canvas.Image, data []float64) {
 		x2 := (i + 1) * step
 		y2 := height - int(data[i+1]/100*float64(height))
 
-		drawLine(dst, x1, y1, x2, y2, color.RGBA{255, 0, 0, 255}) // Red line for the graph
+		// Determine line color based on utilization
+		lineColor := color.RGBA{0, 255, 0, 255} // Green for utilization under 75%
+		if data[i] >= 75 || data[i+1] >= 75 {
+			lineColor = color.RGBA{255, 0, 0, 255} // Red for utilization 75% or above
+		}
+
+		drawLine(dst, x1, y1, x2, y2, lineColor)
 	}
 
 	img.Image = dst
