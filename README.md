@@ -1,3 +1,5 @@
+[![tylercode-cycles](https://snapcraft.io/tylercode-cycles/badge.svg)](https://snapcraft.io/tylercode-cycles)
+
 # cycles
 Desktop CPU Monitor I threw together while trying to debug some issues with my computer. 
 
