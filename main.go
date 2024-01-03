@@ -30,7 +30,7 @@ func main() {
 		//log.Fatal("Could not load icon:", err)
 	}
 
-	myWindow := myApp.NewWindow("Cycles")
+	myWindow := myApp.NewWindow("Cycles | 0.3.2")
 	myWindow.SetIcon(icon)
 
 	// Determine the number of CPU cores
@@ -138,12 +138,13 @@ func drawGraph(img *canvas.Image, data []float64) {
 		y2 := height - int(data[i+1]/100*float64(height))
 
 		// Determine line color based on utilization
-		lineColor := color.RGBA{0, 255, 0, 255} // Green for utilization under 75%
+		lineColor := GetStatusColor("green") // Green for utilization under 75%
 		if data[i] >= 75 || data[i+1] >= 75 {
-			lineColor = color.RGBA{255, 0, 0, 255} // Red for utilization 75% or above
+			lineColor = GetStatusColor("red") // Red for utilization 75% or above
 		}
 
-		drawLine(dst, x1, y1, x2, y2, lineColor)
+		drawLine(dst, x1, y1, x2, y2, lineColor) // Perform type assertion to convert lineColor to color.RGBA
+
 	}
 
 	img.Image = dst
@@ -229,4 +230,43 @@ func NewCoreTile() *CoreTile {
 
 func (t *CoreTile) GetContainer() fyne.CanvasObject {
 	return t.container
+}
+
+var (
+	GreenLight  = color.RGBA{R: 26, G: 155, B: 12, A: 255}  // Light theme green
+	YellowLight = color.RGBA{R: 190, G: 161, B: 14, A: 255} // Light theme yellow
+	RedLight    = color.RGBA{R: 186, G: 14, B: 23, A: 255}  // Light theme red
+
+	GreenDark  = color.RGBA{R: 21, G: 222, B: 0, A: 255}  // Dark theme green
+	YellowDark = color.RGBA{R: 255, G: 214, B: 0, A: 255} // Dark theme yellow
+	RedDark    = color.RGBA{R: 252, G: 0, B: 13, A: 255}  // Dark theme red
+)
+
+func GetStatusColor(status string) color.RGBA {
+	currentTheme := fyne.CurrentApp().Settings().Theme()
+	isDark := true
+
+	if currentTheme == theme.LightTheme() {
+		isDark = false
+	}
+
+	switch status {
+	case "green":
+		if isDark {
+			return GreenDark
+		}
+		return GreenLight
+	case "yellow":
+		if isDark {
+			return YellowDark
+		}
+		return YellowLight
+	case "red":
+		if isDark {
+			return RedDark
+		}
+		return RedLight
+	}
+
+	return GreenLight
 }
