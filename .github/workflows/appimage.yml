@@ -29,7 +29,8 @@ jobs:
         cp cycles AppDir/
         cp appimage/tylercode-cycles.desktop AppDir/
         cp appimage/icon.png AppDir/
-        echo '#!/bin/sh\n./cycles' > AppDir/AppRun
+        echo '#!/bin/sh' > AppDir/AppRun
+        echo './cycles' >> AppDir/AppRun
         chmod +x AppDir/AppRun
 
     - name: Download appimagetool
