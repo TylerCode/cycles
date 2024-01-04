@@ -1,4 +1,5 @@
-[![tylercode-cycles](https://snapcraft.io/tylercode-cycles/badge.svg)](https://snapcraft.io/tylercode-cycles)
+[![Build Snap](https://snapcraft.io/tylercode-cycles/badge.svg)](https://snapcraft.io/tylercode-cycles)
+[![Build AppImage](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml/badge.svg)](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml)
 
 # cycles
 Desktop CPU Monitor I threw together while trying to debug some issues with my computer. 
@@ -18,12 +19,30 @@ The ultimate goal is to have something more akin to the performance tab in Windo
 ## Features
 - Displays CPU core utilization and frequency.
 - Real-time (every 2 seconds) updates for each CPU core.
-- Graphical representation of CPU utilization history for the last 20 measurements.
-- Customizable UI with system color scheme compatibility.
+- Utilization graphs showing history.
+
 
 ## Installation
+Currently, this application is only available on x86 machines running linux. ARM64 is available via snap with the `--edge` flag but it's untested. 
 
-Option 1: 
+### Snap Store
+- Install the snap package with
+```bash
+sudo snap install tylercode-cycles --candidate
+```
+- A "Release" build will be out once I've tested it on a few other machines.
+
+
+### FlatPak
+- Coming soon...
+
+
+### AppImage
+- Download the latest .AppImage from the [releases page.](https://github.com/TylerCode/cycles/releases)
+- Run the AppImage
+
+
+### Plain old executable
 - Download the latest release on the github release page. [Found here...](https://github.com/TylerCode/cycles/releases)
 - Download the "cycles" file or the entire zip
 - Make it executable if it isn't already
@@ -32,21 +51,6 @@ chmod +x cycles
 ```
 - Run it! (double click or `./cycles`)
 
-Option 2:
-- Install the snap package with
-```bash
-sudo snap install tylercode-cycles --candidate
-```
-- A "Release" build will be out once I've tested it on a few other machines.
-
-Option 3:
-- Wait for Flatpak
-
-Option 4:
-- Wait for AppImage
-
-Option 5:
-- Build it yourself
 
 
 ## Contributing
@@ -71,6 +75,7 @@ go get fyne.io/fyne/v2
 go get github.com/shirou/gopsutil/cpu
 ```
 
+
 ### Contrib Notes
 
 Contributions to this project will be welcome probably after 0.6!
@@ -84,9 +89,11 @@ Please follow these steps:
 5. Push to the branch (`git push origin feature/YourFeature`).
 6. Open a Pull Request.
 
+
 ## License
 MIT
 
+
 ## Acknowledgments
-- Fyne team for the wonderful UI toolkit.
+- Fyne team for an incredible cross-platform ui kit.
 - The `gopsutil` library for system information access.
