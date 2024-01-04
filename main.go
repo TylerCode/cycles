@@ -34,7 +34,7 @@ func main() {
 	myWindow.SetIcon(icon)
 
 	// Determine the number of CPU cores
-	numCores, _ := cpu.Counts(true) // True because we want logical and physical
+	numCores, _ := cpu.Counts(true) // True because we want logical cores, this should be a toggle in settings
 	tiles := make([]*CoreTile, numCores)
 
 	// Create a grid container
@@ -94,7 +94,7 @@ func updateCPUInfo(tiles []*CoreTile) {
 
 		// Update utilization history
 		tile.UtilHistory = append(tile.UtilHistory, percent[i])
-		if len(tile.UtilHistory) > 20 { // Keep only the last 20 measurements
+		if len(tile.UtilHistory) > 30 { // Keep only the last minute of measurements
 			tile.UtilHistory = tile.UtilHistory[1:]
 		}
 
@@ -104,14 +104,15 @@ func updateCPUInfo(tiles []*CoreTile) {
 }
 
 func drawGraph(img *canvas.Image, data []float64) {
-	const width, height = 100, 50 // Adjust as needed
+	const width, height = 120, 50 // Graph dimensions
 
 	// Create a new image for the graph
 	rect := image.Rect(0, 0, width, height)
 	dst := image.NewRGBA(rect)
 
-	// Clear the image
-	draw.Draw(dst, dst.Bounds(), &image.Uniform{color.RGBA{0, 0, 0, 0}}, image.ZP, draw.Src)
+	// Set background color
+	backgroundColor := theme.BackgroundColor()
+	draw.Draw(dst, dst.Bounds(), &image.Uniform{backgroundColor}, image.ZP, draw.Src)
 
 	// Draw the box around the graph
 	borderColor := color.RGBA{128, 128, 128, 255}              // Grey color
@@ -138,9 +139,9 @@ func drawGraph(img *canvas.Image, data []float64) {
 		y2 := height - int(data[i+1]/100*float64(height))
 
 		// Determine line color based on utilization
-		lineColor := GetStatusColor("green") // Green for utilization under 75%
+		lineColor := GetGraphLineColor("green") // Green for utilization under 75%
 		if data[i] >= 75 || data[i+1] >= 75 {
-			lineColor = GetStatusColor("red") // Red for utilization 75% or above
+			lineColor = GetGraphLineColor("red") // Red for utilization 75% or above
 		}
 
 		drawLine(dst, x1, y1, x2, y2, lineColor) // Perform type assertion to convert lineColor to color.RGBA
@@ -151,6 +152,8 @@ func drawGraph(img *canvas.Image, data []float64) {
 	img.Refresh()
 }
 
+// Bresenham's line algorithm
+// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
 func drawLine(img *image.RGBA, x1, y1, x2, y2 int, col color.RGBA) {
 	dx := abs(x2 - x1)
 	sx := -1
@@ -185,6 +188,7 @@ func drawLine(img *image.RGBA, x1, y1, x2, y2 int, col color.RGBA) {
 	}
 }
 
+// simple abs so that I don't need a whole math import
 func abs(x int) int {
 	if x < 0 {
 		return -x
@@ -242,7 +246,7 @@ var (
 	RedDark    = color.RGBA{R: 252, G: 0, B: 13, A: 255}  // Dark theme red
 )
 
-func GetStatusColor(status string) color.RGBA {
+func GetGraphLineColor(status string) color.RGBA {
 	currentTheme := fyne.CurrentApp().Settings().Theme()
 	isDark := true
 
