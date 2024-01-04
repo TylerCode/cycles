@@ -40,7 +40,7 @@ jobs:
 
     - name: Build AppImage
       run: |
-        ./appimagetool-x86_64.AppImage AppDir/
+        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/
 
     - name: Upload AppImage
       uses: actions/upload-artifact@v2
