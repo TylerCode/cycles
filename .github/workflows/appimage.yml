@@ -32,7 +32,7 @@ jobs:
         echo '#!/bin/sh' > AppDir/AppRun
         echo 'pwd' >> AppDir/AppRun
         echo 'ls -alh' >> AppDir/AppRun
-        echo './cycles' >> AppDir/AppRun
+        echo '"$APPDIR/cycles"' >> AppDir/AppRun
         chmod +x AppDir/AppRun
 
     - name: Download appimagetool
