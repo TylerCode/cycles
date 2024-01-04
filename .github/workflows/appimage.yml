@@ -1,0 +1,49 @@
+name: Build AppImage
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.21.5'
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev
+
+
+    - name: Build the Go application
+      run: |
+        GOOS=linux go build -o cycles
+
+    - name: Prepare AppDir
+      run: |
+        mkdir AppDir
+        cp cycles AppDir/
+        cp snap/gui/tylercode-cycles.desktop AppDir/
+        cp snap/gui/icon.png AppDir/
+        echo '#!/bin/sh\n./myapp' > AppDir/AppRun
+        chmod +x AppDir/AppRun
+
+    - name: Download appimagetool
+      run: |
+        wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x appimagetool-x86_64.AppImage
+
+    - name: Build AppImage
+      run: |
+        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v2
+      with:
+        name: Cycles-AppImage
+        path: Cycles.AppImage
