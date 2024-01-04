@@ -22,7 +22,7 @@ jobs:
 
     - name: Build the Go application
       run: |
-        GOOS=linux go build -o myapp
+        GOOS=linux go build -o cycles
 
     - name: Prepare AppDir
       run: |
