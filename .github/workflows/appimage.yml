@@ -30,8 +30,8 @@ jobs:
         cp appimage/tylercode-cycles.desktop AppDir/
         cp appimage/icon.png AppDir/
         echo '#!/bin/sh' > AppDir/AppRun
-        echo 'pwd'
-        echo 'ls -alh'
+        echo 'pwd' >> AppDir/AppRun
+        echo 'ls -alh' >> AppDir/AppRun
         echo './cycles' >> AppDir/AppRun
         chmod +x AppDir/AppRun
 
