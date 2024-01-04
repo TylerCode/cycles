@@ -73,7 +73,9 @@ go get github.com/shirou/gopsutil/cpu
 
 ### Contrib Notes
 
-Contributions to this project are welcome! Please follow these steps:
+Contributions to this project will be welcome probably after 0.6!
+
+Please follow these steps:
 
 1. Fork the repository.
 2. Create a new branch (`git checkout -b feature/YourFeature`).
