@@ -19,28 +19,28 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev
 
-
     - name: Build the Go application
       run: |
         GOOS=linux go build -o cycles
 
     - name: Prepare AppDir
       run: |
-        mkdir AppDir
+        mkdir -p AppDir/usr/share/applications
+        mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
         cp cycles AppDir/
-        cp appimage/tylercode-cycles.desktop AppDir/
-        cp appimage/icon.png AppDir/
-        echo '#!/bin/sh\n./myapp' > AppDir/AppRun
+        cp appimage/tylercode-cycles.desktop AppDir/usr/share/applications/
+        cp appimage/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/
+        echo '#!/bin/sh\n./cycles' > AppDir/AppRun
         chmod +x AppDir/AppRun
 
     - name: Download appimagetool
       run: |
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x appimagetool-x86_64.AppImage
-
+        
     - name: Build AppImage
       run: |
-        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/
+        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/ Cycles.AppImage
 
     - name: Upload AppImage
       uses: actions/upload-artifact@v2
