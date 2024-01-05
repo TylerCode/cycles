@@ -30,7 +30,7 @@ func main() {
 		//log.Fatal("Could not load icon:", err)
 	}
 
-	myWindow := myApp.NewWindow("Cycles | 0.3.2")
+	myWindow := myApp.NewWindow("Cycles | 0.3.3")
 	myWindow.SetIcon(icon)
 
 	// Determine the number of CPU cores
@@ -246,6 +246,7 @@ var (
 	RedDark    = color.RGBA{R: 252, G: 0, B: 13, A: 255}  // Dark theme red
 )
 
+// This doesn't actually work so far as I can tell because light theme is gone
 func GetGraphLineColor(status string) color.RGBA {
 	currentTheme := fyne.CurrentApp().Settings().Theme()
 	isDark := true
