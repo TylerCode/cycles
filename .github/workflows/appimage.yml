@@ -42,10 +42,10 @@ jobs:
         
     - name: Build AppImage
       run: |
-        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/ Cycles.AppImage
+        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/ cycles-x86.AppImage
 
     - name: Upload AppImage
       uses: actions/upload-artifact@v2
       with:
         name: Cycles-AppImage
-        path: Cycles.AppImage
+        path: cycles-x86.AppImage
