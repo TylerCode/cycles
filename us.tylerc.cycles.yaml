@@ -1,0 +1,38 @@
+app-id: us.tylerc.cycles
+runtime: org.freedesktop.Platform
+runtime-version: '20.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+    - org.freedesktop.Sdk.Extension.golang
+command: cycles
+
+finish-args:
+    - --share=ipc 
+    - --socket=x11
+    - --device=dri 
+    - --socket=wayland
+
+    # Needed to support desktop notifications.
+    #- --talk-name=org.freedesktop.Notifications
+
+    # Allowing access to the home directory as example.
+    - --filesystem=home
+
+build-options:
+  env:
+    - GOBIN=/app/bin
+    - GOROOT=/usr/lib/sdk/golang
+
+modules:
+    - name: cycles
+      buildsystem: simple
+      build-commands:
+        - $GOROOT/bin/go build -trimpath -o cycles
+        - install -Dm00755 cycles $FLATPAK_DEST/bin/cycles
+        - install -Dm00644 icon.png $FLATPAK_DEST/share/icons/hicolor/256x256/apps/$FLATPAK_ID.png
+        - install -Dm00644 $FLATPAK_ID.desktop $FLATPAK_DEST/share/applications/$FLATPAK_ID.desktop
+        - install -Dm00644 $FLATPAK_ID.appdata.xml $FLATPAK_DEST/share/appdata/$FLATPAK_ID.appdata.xml
+      sources:
+        - type: archive
+          url: "https://github.com/fyne-io/cycles/archive/refs/tags/v1.3.0.tar.gz"
+          sha256: a9d3b920404b3b699da757a9641ebc75cf43e35515dd9879622de33c6d104b63 # Update by running sha256sum on the file linked in the url.

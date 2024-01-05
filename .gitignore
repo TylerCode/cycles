@@ -21,3 +21,5 @@
 go.work
 *.snap
 cycles
+.flatpak-builder/checksums/x86_64-us.tylerc.cycles.json
+.flatpak-builder/ccache/disabled/ccache.conf

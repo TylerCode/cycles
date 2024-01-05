@@ -1,7 +1,7 @@
 [Desktop Entry]
+Type=Application
 Name=Cycles
 Comment=A simple, theme-aware, CPU information tool
-Exec=cycles
-Icon=icon
-Type=Application
 Categories=Utility;
+Icon=us.tylerc.cycles
+Exec=cycles
