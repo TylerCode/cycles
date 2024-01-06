@@ -22,8 +22,12 @@
   <launchable type="desktop-id">us.tylerc.cycles.desktop</launchable>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/TylerCode/cycles/main/snap/local/screenshot-dark-0.3.png</image>
-      <caption>Screenshot</caption>
+      <image>https://raw.githubusercontent.com/TylerCode/cycles/main/screenshots/screenshot-dark-0.3.png</image>
+      <caption>Screenshot Dark</caption>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/TylerCode/cycles/main/screenshots/screenshot-light-0.3.png</image>
+      <caption>Screenshot Light</caption>
     </screenshot>
   </screenshots>
 
