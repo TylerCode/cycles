@@ -34,5 +34,5 @@ modules:
         - install -Dm00644 $FLATPAK_ID.appdata.xml $FLATPAK_DEST/share/appdata/$FLATPAK_ID.appdata.xml
       sources:
         - type: archive
-          url: "https://get.station307.com/KkWucMFKip4/repo-archive.tar.gz"
-          sha256: 7538f65d2eead703a08e5a2e6f87ad291de490b42c716c2d92060c446da34824
+          url: "https://get.station307.com/luYXLAvkkEa/repo-archive.tar.gz"
+          sha256: dd85e7002ff5f2c67852e104e5bf27e488ef094300821c6d2fc42844afda12c8
