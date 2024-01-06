@@ -1,0 +1,22 @@
+name: Archive Repository
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Archive Repository
+      run: |
+        tar -czf repo-archive.tar.gz .
+
+    - name: Upload Archive as Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: repo-archive
+        path: repo-archive.tar.gz
