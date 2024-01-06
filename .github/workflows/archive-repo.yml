@@ -14,7 +14,9 @@ jobs:
     - name: Archive Repository
       run: |
         mkdir temp
-        cp -R * .github .gitignore temp/
+        # Copy all files and directories except 'temp'
+        shopt -s extglob
+        cp -R !(temp) temp/
         tar -czf repo-archive.tar.gz temp
 
     - name: Upload Archive as Artifact
