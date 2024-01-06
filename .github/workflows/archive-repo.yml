@@ -13,7 +13,9 @@ jobs:
 
     - name: Archive Repository
       run: |
-        tar --exclude='./.git' -czf repo-archive.tar.gz .
+        mkdir temp
+        cp -R * .github .gitignore temp/
+        tar -czf repo-archive.tar.gz temp
 
     - name: Upload Archive as Artifact
       uses: actions/upload-artifact@v2
