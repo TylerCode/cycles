@@ -1,6 +1,6 @@
 app-id: us.tylerc.cycles
 runtime: org.freedesktop.Platform
-runtime-version: '20.08'
+runtime-version: '22.08'
 sdk: org.freedesktop.Sdk
 sdk-extensions:
     - org.freedesktop.Sdk.Extension.golang
@@ -34,5 +34,5 @@ modules:
         - install -Dm00644 $FLATPAK_ID.appdata.xml $FLATPAK_DEST/share/appdata/$FLATPAK_ID.appdata.xml
       sources:
         - type: archive
-          url: "https://github.com/TylerCode/cycles/archive/refs/tags/0.3.3.tar.gz"
-          sha256: 46bd807cbdabc36d07509c47588505c4a5b03e502e6b66ab31811f1052f403da
+          url: "https://get.station307.com/phMhi4qZxp7/repo-archive.tar.gz"
+          sha256: 2633913d0cc5ada50ab2367689b877d0514aba87ab7108ec73edce94003d8067
