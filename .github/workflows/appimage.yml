@@ -48,4 +48,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Cycles-AppImage
-        path: cycles-x86.AppImage
+        path: cycles-0.3.3-x86_64.AppImage

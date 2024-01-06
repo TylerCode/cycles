@@ -13,7 +13,7 @@ jobs:
 
     - name: Archive Repository
       run: |
-        tar --exclude='./.git' --exclude='./some_other_directory' -czf repo-archive.tar.gz .
+        tar --exclude='./.git' -czf repo-archive.tar.gz .
 
     - name: Upload Archive as Artifact
       uses: actions/upload-artifact@v2
