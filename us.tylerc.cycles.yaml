@@ -35,4 +35,4 @@ modules:
       sources:
         - type: archive
           url: "https://github.com/TylerCode/cycles/archive/refs/tags/0.3.4.tar.gz"
-          sha256: e7896685032993984aa5248a53f3e13ef156944a04d0f486b0160b200b58273c
+          sha256: 845344b00555d7029d2a0ebf6d6de028b43c926d097c19b5745a4d01d804c292
