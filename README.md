@@ -28,7 +28,7 @@ Currently, this application is only available on x86 machines running linux. ARM
 ### Snap Store
 - Install the snap package with
 ```bash
-sudo snap install tylercode-cycles --candidate
+sudo snap install tylercode-cycles
 ```
 - A "Release" build will be out once I've tested it on a few other machines.
 
