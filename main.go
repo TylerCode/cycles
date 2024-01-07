@@ -30,7 +30,7 @@ func main() {
 		//log.Fatal("Could not load icon:", err)
 	}
 
-	myWindow := myApp.NewWindow("Cycles | 0.3.3")
+	myWindow := myApp.NewWindow("Cycles | 0.3.4")
 	myWindow.SetIcon(icon)
 
 	// Determine the number of CPU cores
