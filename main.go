@@ -22,6 +22,15 @@ import (
 	"image"
 )
 
+type CoreTile struct {
+	CoreLabel   *widget.Label
+	UtilLabel   *widget.Label
+	ClockLabel  *widget.Label
+	container   *fyne.Container
+	UtilHistory []float64 // Slice to store utilization history
+	GraphImg    *canvas.Image
+}
+
 func main() {
 	myApp := app.New()
 
@@ -188,21 +197,12 @@ func drawLine(img *image.RGBA, x1, y1, x2, y2 int, col color.RGBA) {
 	}
 }
 
-// simple abs so that I don't need a whole math import
+// simple abs so that I don't need a whole math import for one function
 func abs(x int) int {
 	if x < 0 {
 		return -x
 	}
 	return x
-}
-
-type CoreTile struct {
-	CoreLabel   *widget.Label
-	UtilLabel   *widget.Label
-	ClockLabel  *widget.Label
-	container   *fyne.Container
-	UtilHistory []float64 // Slice to store utilization history
-	GraphImg    *canvas.Image
 }
 
 func NewCoreTile() *CoreTile {
@@ -236,6 +236,7 @@ func (t *CoreTile) GetContainer() fyne.CanvasObject {
 	return t.container
 }
 
+// Theme table, mostly for graphs, need to move out of this into a real theme
 var (
 	GreenLight  = color.RGBA{R: 26, G: 155, B: 12, A: 255}  // Light theme green
 	YellowLight = color.RGBA{R: 190, G: 161, B: 14, A: 255} // Light theme yellow
