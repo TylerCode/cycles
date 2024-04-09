@@ -67,6 +67,7 @@ func main() {
 	myWindow.ShowAndRun()
 }
 
+/// Update the CPU information
 func updateCPUInfo(tiles []*CoreTile) {
 	percent, err := cpu.Percent(0, true)
 	if err != nil {
@@ -112,6 +113,7 @@ func updateCPUInfo(tiles []*CoreTile) {
 	}
 }
 
+/// Draw the graph
 func drawGraph(img *canvas.Image, data []float64) {
 	const width, height = 120, 50 // Graph dimensions
 
@@ -205,6 +207,7 @@ func abs(x int) int {
 	return x
 }
 
+/// Create a new core tile
 func NewCoreTile() *CoreTile {
 	coreLabel := widget.NewLabel("Core #")
 	utilLabel := widget.NewLabel("Util %")
@@ -232,6 +235,7 @@ func NewCoreTile() *CoreTile {
 	}
 }
 
+/// Get the container of the core tile
 func (t *CoreTile) GetContainer() fyne.CanvasObject {
 	return t.container
 }
@@ -275,4 +279,46 @@ func GetGraphLineColor(status string) color.RGBA {
 	}
 
 	return GreenLight
+}
+
+// getMemoryInfo returns a MemoryInfo struct with the total, used, and free memory
+func getMemoryInfo() MemoryInfo {
+
+	// Get memory info from /proc/meminfo
+	file, err := os.Open("/proc/meminfo")
+	if err != nil {
+		return MemoryInfo{}
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var total, free uint64
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "MemTotal:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				total, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		} else if strings.HasPrefix(line, "MemFree:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				free, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		}
+	}
+
+	used := total - free
+	return MemoryInfo{
+		Total: total,
+		Used:  used,
+		Free:  free,
+	}
+}
+
+// Memory info data structure
+struct MemoryInfo {
+	Total uint64
+	Used uint64
+	Free uint64
 }
