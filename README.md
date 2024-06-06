@@ -2,7 +2,7 @@
 [![Build AppImage](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml/badge.svg)](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml)
 
 # cycles
-Desktop CPU Monitor I threw together while trying to debug some issues with my computer. 
+Desktop CPU Monitor I threw together while trying to debug some issues with my computer. Have not been dedicating a lot of time to this lately since I'm not on a machine with Snap access anymore. 
 
 ![image](https://github.com/TylerCode/cycles/assets/18288340/36332a79-6882-4204-ba6d-51d061798229)
 
@@ -25,6 +25,7 @@ The ultimate goal is to have something more akin to the performance tab in Windo
 ## Installation
 Currently, this application is only available on x86 machines running linux. ARM64 is available via snap with the `--edge` flag but it's untested. 
 
+
 ### Snap Store
 - Install the snap package with
 ```bash
@@ -34,7 +35,7 @@ sudo snap install tylercode-cycles
 
 
 ### FlatPak
-- Coming soon...
+- Coming soon... maybe
 
 
 ### AppImage
@@ -50,7 +51,6 @@ sudo snap install tylercode-cycles
 chmod +x cycles
 ```
 - Run it! (double click or `./cycles`)
-
 
 
 ## Contributing
