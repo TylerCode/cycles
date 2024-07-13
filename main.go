@@ -46,7 +46,7 @@ func main() {
 		//log.Fatal("Could not load icon:", err)
 	}
 
-	myWindow := myApp.NewWindow("Cycles | 0.3.4")
+	myWindow := myApp.NewWindow("Cycles | 0.4.0")
 	myWindow.SetIcon(icon)
 
 	// Determine the number of CPU cores
@@ -74,7 +74,7 @@ func main() {
 	myWindow.ShowAndRun()
 }
 
-/// Update the CPU information
+// / Update the CPU information
 func updateCPUInfo(tiles []*CoreTile) {
 	percent, err := cpu.Percent(0, true)
 	if err != nil {
@@ -120,7 +120,7 @@ func updateCPUInfo(tiles []*CoreTile) {
 	}
 }
 
-/// Draw the graph
+// / Draw the graph
 func drawGraph(img *canvas.Image, data []float64) {
 	const width, height = 120, 50 // Graph dimensions
 
@@ -214,7 +214,7 @@ func abs(x int) int {
 	return x
 }
 
-/// Create a new core tile
+// / Create a new core tile
 func NewCoreTile() *CoreTile {
 	coreLabel := widget.NewLabel("Core #")
 	utilLabel := widget.NewLabel("Util %")
@@ -242,7 +242,7 @@ func NewCoreTile() *CoreTile {
 	}
 }
 
-/// Get the container of the core tile
+// / Get the container of the core tile
 func (t *CoreTile) GetContainer() fyne.CanvasObject {
 	return t.container
 }
