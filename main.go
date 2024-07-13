@@ -31,6 +31,13 @@ type CoreTile struct {
 	GraphImg    *canvas.Image
 }
 
+// Memory info data structure
+type MemoryInfo struct {
+	Total uint64
+	Used  uint64
+	Free  uint64
+}
+
 func main() {
 	myApp := app.New()
 
@@ -314,11 +321,4 @@ func getMemoryInfo() MemoryInfo {
 		Used:  used,
 		Free:  free,
 	}
-}
-
-// Memory info data structure
-struct MemoryInfo {
-	Total uint64
-	Used uint64
-	Free uint64
 }
