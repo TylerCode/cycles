@@ -35,7 +35,7 @@ sudo snap install tylercode-cycles
 
 
 ### FlatPak
-- Coming soon... maybe
+- Coming in 0.5
 
 
 ### AppImage
@@ -62,6 +62,7 @@ chmod +x cycles
 
 
 ### Setup
+This section needs an overhaul, will be updating the Wiki with both a Fedora based and Ubuntu based guide. 
 
 To set up the project on your local machine:
 
@@ -71,8 +72,7 @@ git clone https://github.com/TylerCode/cycles
 ```
 2. Add dependencies:
 ```
-go get fyne.io/fyne/v2
-go get github.com/shirou/gopsutil/cpu
+go mod tidy
 ```
 
 
