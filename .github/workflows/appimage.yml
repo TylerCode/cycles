@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: '1.21.5'
 
@@ -45,7 +45,7 @@ jobs:
         ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/ cycles-0.3.4-x86_64.AppImage
 
     - name: Upload AppImage
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: Cycles-AppImage
         path: cycles-0.3.4-x86_64.AppImage

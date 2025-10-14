@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -20,7 +20,7 @@ jobs:
         tar -czf repo-archive.tar.gz temp
 
     - name: Upload Archive as Artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: repo-archive
         path: repo-archive.tar.gz
