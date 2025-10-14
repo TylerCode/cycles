@@ -7,21 +7,21 @@ import (
 
 // AppConfig holds the application configuration
 type AppConfig struct {
-	Version       string
-	GridColumns   int
+	Version        string
+	GridColumns    int
 	UpdateInterval time.Duration
 	HistorySize    int
-	LogicalCores  bool
+	LogicalCores   bool
 }
 
 // DefaultConfig returns the default configuration
 func DefaultConfig() *AppConfig {
 	return &AppConfig{
-		Version:       "0.4.0",
-		GridColumns:   4,
+		Version:        "0.4.0",
+		GridColumns:    4,
 		UpdateInterval: 2 * time.Second,
-		HistorySize:   30,
-		LogicalCores:  true,
+		HistorySize:    30,
+		LogicalCores:   true,
 	}
 }
 
