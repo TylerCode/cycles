@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"github.com/shirou/gopsutil/cpu"
 )
 
@@ -26,6 +27,15 @@ func main() {
 	windowTitle := fmt.Sprintf("Cycles | %s", config.Version)
 	myWindow := myApp.NewWindow(windowTitle)
 	myWindow.SetIcon(icon)
+
+	// Set up menu
+	aboutItem := fyne.NewMenuItem("About", func() {
+		dialog.ShowInformation("About Cycles", GetAppInfo(), myWindow)
+	})
+	
+	helpMenu := fyne.NewMenu("Help", aboutItem)
+	mainMenu := fyne.NewMainMenu(helpMenu)
+	myWindow.SetMainMenu(mainMenu)
 
 	// Determine the number of CPU cores
 	numCores, err := cpu.Counts(config.LogicalCores)
