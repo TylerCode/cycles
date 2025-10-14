@@ -8,7 +8,7 @@ Desktop CPU Monitor I threw together while trying to debug some issues with my c
 
 
 ## Overview
-This application provides a real-time graphical representation of CPU utilization for each logical core. It displays the utilization percentage and frequency of each core with history going back 20 measurements. 
+This application provides a real-time graphical representation of CPU utilization for each logical core. It displays the utilization percentage and frequency of each core with history going back 30 measurements. 
 
 The ultimate goal is to have something more akin to the performance tab in Windows Task Manager. 
 
@@ -17,9 +17,16 @@ The ultimate goal is to have something more akin to the performance tab in Windo
 
 
 ## Features
-- Displays CPU core utilization and frequency.
-- Real-time (every 2 seconds) updates for each CPU core.
-- Utilization graphs showing history.
+- Displays CPU core utilization and frequency in real-time
+- Customizable update interval (default: every 2 seconds)
+- Utilization graphs showing historical data
+- Command-line flags for customization:
+  - `--columns`: Number of columns in the grid layout (default: 4)
+  - `--interval`: Update interval (default: 2s)
+  - `--history`: Number of historical data points to keep (default: 30)
+  - `--logical`: Show logical cores vs physical cores (default: true)
+- Improved error handling and logging
+- Modular code structure for easier maintenance
 
 
 ## Installation
@@ -62,17 +69,43 @@ chmod +x cycles
 
 
 ### Setup
-This section needs an overhaul, will be updating the Wiki with both a Fedora based and Ubuntu based guide. 
-
 To set up the project on your local machine:
 
-1. Clone the repository (I would make a fork and clone that but to play around):
-```
+1. Clone the repository (I would make a fork and clone that to contribute):
+```bash
 git clone https://github.com/TylerCode/cycles
+cd cycles
 ```
-2. Add dependencies:
+
+2. Install system dependencies (Ubuntu/Debian):
+```bash
+sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev
 ```
+
+3. Install Go dependencies:
+```bash
 go mod tidy
+```
+
+4. Build the application:
+```bash
+go build -o cycles
+```
+
+5. Run it:
+```bash
+./cycles
+```
+
+6. Run tests:
+```bash
+go test -v ./...
+```
+
+### Command-Line Options
+Cycles supports several command-line flags for customization:
+```bash
+./cycles --columns 8 --interval 1s --history 60 --logical=false
 ```
 
 
