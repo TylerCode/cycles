@@ -21,6 +21,7 @@ jobs:
 
     - name: Build the Go application
       run: |
+        go mod download
         GOOS=linux go build -o cycles
 
     - name: Prepare AppDir
