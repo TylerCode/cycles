@@ -32,7 +32,7 @@ func main() {
 	aboutItem := fyne.NewMenuItem("About", func() {
 		dialog.ShowInformation("About Cycles", GetAppInfo(), myWindow)
 	})
-	
+
 	helpMenu := fyne.NewMenu("Help", aboutItem)
 	mainMenu := fyne.NewMainMenu(helpMenu)
 	myWindow.SetMainMenu(mainMenu)
