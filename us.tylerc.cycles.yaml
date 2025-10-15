@@ -33,5 +33,5 @@ modules:
         - install -Dm00644 $FLATPAK_ID.appdata.xml $FLATPAK_DEST/share/appdata/$FLATPAK_ID.appdata.xml
       sources:
         - type: archive
-          url: "https://github.com/TylerCode/cycles/archive/refs/tags/0.3.4.tar.gz"
+          url: "https://github.com/TylerCode/cycles/archive/refs/tags/0.4.1.tar.gz"
           sha256: 845344b00555d7029d2a0ebf6d6de028b43c926d097c19b5745a4d01d804c292
