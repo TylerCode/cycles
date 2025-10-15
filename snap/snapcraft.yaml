@@ -1,5 +1,5 @@
 name: tylercode-cycles
-version: '0.3.4'
+version: '0.4.1'
 summary: A simple, theme-aware, CPU information tool
 description: |
   This application displays all logical cores on the machine and the current clock speed and core utilization. The theme is controlled by the OS.

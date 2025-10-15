@@ -8,8 +8,8 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
 
-	if config.Version != "0.4.0" {
-		t.Errorf("Expected version 0.4.0, got %s", config.Version)
+	if config.Version != "0.4.1" {
+		t.Errorf("Expected version 0.4.1, got %s", config.Version)
 	}
 
 	if config.GridColumns != 4 {

@@ -29,8 +29,8 @@ func TestGetAppInfo(t *testing.T) {
 		t.Error("Expected app info to contain 'Cycles'")
 	}
 
-	if !strings.Contains(info, "0.4.0") {
-		t.Error("Expected app info to contain version 0.4.0")
+	if !strings.Contains(info, "0.4.1") {
+		t.Error("Expected app info to contain version 0.4.1")
 	}
 
 	if !strings.Contains(info, "MIT") {
