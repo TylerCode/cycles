@@ -68,8 +68,9 @@ chmod +x cycles
 - `gopsutil` library for accessing system information.
 
 
-### Setup
-To set up the project on your local machine:
+### Quick Start (Automated Setup)
+
+The easiest way to get started developing:
 
 1. Clone the repository (I would make a fork and clone that to contribute):
 ```bash
@@ -77,29 +78,78 @@ git clone https://github.com/TylerCode/cycles
 cd cycles
 ```
 
-2. Install system dependencies (Ubuntu/Debian):
+2. Run automated setup (detects your OS and installs all dependencies):
 ```bash
-sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev
+make setup
+```
+
+3. Build and run:
+```bash
+make run
+```
+
+That's it! The `make setup` command will:
+- Detect your Linux distribution (Ubuntu/Debian, Fedora/RHEL, Arch)
+- Install all required system dependencies
+- Download and verify Go dependencies
+- Test that everything builds correctly
+
+### Manual Setup
+
+If you prefer manual installation or the automated setup doesn't work:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/TylerCode/cycles
+cd cycles
+```
+
+2. Install system dependencies:
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev pkg-config gcc make
+```
+
+**Fedora/RHEL:**
+```bash
+sudo dnf install mesa-libGL-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel glfw-devel libXxf86vm-devel pkg-config gcc gcc-c++ make
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S mesa libxcursor libxrandr libxinerama libxi glfw-x11 pkg-config gcc make
 ```
 
 3. Install Go dependencies:
 ```bash
-go mod tidy
+make install-deps
 ```
 
 4. Build the application:
 ```bash
-go build -o cycles
+make build
 ```
 
 5. Run it:
 ```bash
-./cycles
+make run
 ```
 
 6. Run tests:
 ```bash
-go test -v ./...
+make test
+```
+
+### Build System Commands
+
+```bash
+make build      # Build optimized binary
+make run        # Build and run
+make test       # Run all tests
+make check      # Format, vet, and test
+make clean      # Remove build artifacts
+make help       # Show all available commands
 ```
 
 ### Command-Line Options

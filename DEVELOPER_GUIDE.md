@@ -162,40 +162,159 @@ func GetNewSystemInfo() (InfoType, error) {
 
 ## Development Workflow
 
-### Setup
+### Quick Start
+
+The easiest way to get started:
+
 ```bash
 # Clone repository
 git clone https://github.com/TylerCode/cycles
 cd cycles
 
-# Install dependencies
-sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev \
-                     libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev
+# Run automated setup (installs all dependencies)
+make setup
+# or manually: ./scripts/setup-dev.sh
 
-# Get Go dependencies
-go mod tidy
-go mod vendor
+# Build the application
+make build
+
+# Run it
+make run
 ```
 
-### Development
+### Setup (Detailed)
+
+#### Automated Setup (Recommended)
+
+Use the automated setup script which detects your OS and installs dependencies:
+
 ```bash
-# Build
-go build -o cycles
+./scripts/setup-dev.sh
+```
 
-# Run
-./cycles
+Supported distributions:
+- Ubuntu/Debian/Pop!_OS/Linux Mint
+- Fedora/RHEL/CentOS/Rocky/AlmaLinux
+- Arch/Manjaro/EndeavourOS
 
-# Run with options
-./cycles --columns 8 --interval 1s
+#### Manual Setup
 
-# Format code
-go fmt ./...
+If the automated setup doesn't work for your OS:
 
-# Check for issues
-go vet ./...
+```bash
+# Install system dependencies (Ubuntu/Debian)
+sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev \
+                     libxinerama-dev libxi-dev libglfw3-dev libxxf86vm-dev \
+                     pkg-config gcc make
+
+# Install Go dependencies
+go mod download
+go mod tidy
+```
+
+### Build System (Makefile)
+
+The project includes a comprehensive Makefile for common tasks:
+
+```bash
+# Build a single bundled binary
+make build
+# Output: build/cycles
+
+# Build and run
+make run
+
+# Quick development build (faster, no optimization)
+make dev
+
+# Build optimized release binary
+make release
+
+# Clean build artifacts
+make clean
 
 # Run tests
-go test -v ./...
+make test
+
+# Run tests (short output)
+make test-short
+
+# Format code
+make fmt
+
+# Run go vet
+make vet
+
+# Format, vet, and test in one command
+make check
+
+# Install dependencies
+make install-deps
+
+# Show binary size information
+make size
+
+# Install to /usr/local/bin (requires sudo)
+make install
+
+# Uninstall from /usr/local/bin
+make uninstall
+
+# Show build environment info
+make info
+
+# Display all available commands
+make help
+```
+
+### Development Commands
+
+#### Building
+```bash
+# Standard build (optimized, single binary)
+make build
+
+# Development build (faster compilation, for testing)
+make dev
+
+# Release build (fully optimized, stripped)
+make release
+```
+
+#### Running
+```bash
+# Build and run with default settings
+make run
+
+# Run manually with custom options
+./build/cycles --columns 8 --interval 1s --history 60
+```
+
+#### Testing
+```bash
+# Run all tests with verbose output
+make test
+
+# Run tests quietly
+make test-short
+
+# Run benchmarks
+make bench
+
+# Format, vet, and test everything
+make check
+```
+
+#### Code Quality
+```bash
+# Format all Go files
+make fmt
+
+# Run static analysis
+make vet
+
+# Check everything (format + vet + test)
+make check
 ```
 
 ### Testing Checklist

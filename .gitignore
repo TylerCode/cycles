@@ -4,6 +4,7 @@
 # Binaries for programs and plugins
 repo/*
 .flatpak-builder/*
+build/
 *.exe
 *.exe~
 *.dll
