@@ -19,6 +19,26 @@ func main() {
 
 	myApp := app.New()
 
+	// Load settings
+	settings := NewSettings(myApp)
+
+	// Command-line flags override saved settings
+	if config.GridColumns != 8 {
+		settings.GridColumns = config.GridColumns
+	}
+	if config.UpdateInterval != 2*time.Second {
+		settings.UpdateInterval = config.UpdateInterval
+	}
+	if config.HistorySize != 30 {
+		settings.HistorySize = config.HistorySize
+	}
+
+	// Apply settings to config
+	settings.ApplyToConfig(config)
+
+	// Apply theme
+	ApplyTheme(myApp, settings.GetThemeVariant())
+
 	icon, err := fyne.LoadResourceFromPath("icon.png")
 	if err != nil {
 		log.Printf("Warning: Could not load icon: %v", err)
@@ -33,8 +53,28 @@ func main() {
 		dialog.ShowInformation("About Cycles", GetAppInfo(), myWindow)
 	})
 
+	settingsItem := fyne.NewMenuItem("Preferences...", func() {
+		ShowSettingsDialog(settings, myWindow, func() {
+			// Settings saved callback
+			log.Println("Settings saved successfully")
+		})
+	})
+
+	// View menu for quick theme toggle
+	themeToggleItem := fyne.NewMenuItem("Toggle Theme", func() {
+		if settings.Theme == "dark" {
+			settings.Theme = "light"
+		} else {
+			settings.Theme = "dark"
+		}
+		settings.Save()
+		ApplyTheme(myApp, settings.GetThemeVariant())
+	})
+
 	helpMenu := fyne.NewMenu("Help", aboutItem)
-	mainMenu := fyne.NewMainMenu(helpMenu)
+	fileMenu := fyne.NewMenu("File", settingsItem)
+	viewMenu := fyne.NewMenu("View", themeToggleItem)
+	mainMenu := fyne.NewMainMenu(fileMenu, viewMenu, helpMenu)
 	myWindow.SetMainMenu(mainMenu)
 
 	// Determine the number of CPU cores

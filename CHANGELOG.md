@@ -5,6 +5,53 @@ All notable changes to the Cycles project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-11-17
+
+### Added
+- **Persistent Settings System** (`settings.go`):
+  - Settings automatically save and load using Fyne preferences
+  - Theme preference (Auto, Light, Dark)
+  - Grid columns, history size, update interval
+  - Logical/physical cores preference
+- **Settings UI Dialog** (`settingsui.go`):
+  - Comprehensive settings dialog with sliders and controls
+  - Theme selector dropdown
+  - Grid columns slider (1-16)
+  - History size slider (10-100)
+  - Update interval input
+  - Logical cores checkbox
+  - Reset to defaults button with confirmation
+- **Enhanced Theme System** (`theme.go`):
+  - Dynamic theme switching without restart
+  - Custom theme implementation
+  - `ApplyTheme()` function for programmatic theme changes
+  - `isDarkTheme()` helper function
+- **Improved Menu System** (update `main.go`):
+  - File menu with "Preferences..." option
+  - View menu with "Toggle Theme" quick action
+  - Reorganized menu structure (File | View | Help)
+  - Settings accessible via File → Preferences
+- **Command-line Flag Priority**:
+  - Command-line flags now override saved settings
+  - Seamless integration between CLI and persistent settings
+
+### Changed
+- Application now loads saved preferences on startup
+- Theme applies immediately on selection
+- Settings persist across application restarts
+- Menu structure reorganized for better UX
+
+### Technical Improvements
+- Settings stored using Fyne's preferences API
+- Platform-independent settings storage
+- Type-safe settings management
+- Comprehensive settings validation
+- Unit tests for settings functionality
+
+### Fixed
+- Theme switching now works reliably
+- Settings apply correctly on save
+
 ## [0.5.0] - 2025-11-17
 
 ### Added
