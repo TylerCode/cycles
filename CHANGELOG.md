@@ -5,6 +5,44 @@ All notable changes to the Cycles project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-11-17
+
+### Added
+- **Memory Monitoring Tab**: New dedicated tab for system memory monitoring
+  - Real-time memory usage display (Total, Used, Free, Cached)
+  - Memory usage percentage with historical graph
+  - Automatic history tracking
+- **Tabbed Interface**: Switched from single-view to tabbed layout
+  - CPU tab: Existing CPU core monitoring
+  - Memory tab: New memory monitoring view
+- **Memory Tile Component** (`memorytile.go`):
+  - Displays comprehensive memory statistics
+  - Shows usage graph over time
+  - Formatted memory sizes (GB/MB)
+- **Enhanced System Information** (`sysinfo.go`):
+  - `GetMemoryInfoDetailed()`: Reads detailed memory info from /proc/meminfo
+  - `UpdateMemoryInfo()`: Updates memory tiles with current data
+  - Tracks MemTotal, MemFree, MemAvailable, Cached, and Buffers
+- **Memory Utility Functions**:
+  - `formatMemorySize()`: Human-readable memory sizes
+  - `formatMemoryPercent()`: Formatted percentage display
+- **Unit Tests** (`memorytile_test.go`):
+  - Tests for memory tile creation
+  - Tests for memory formatting functions
+  - Validation of component initialization
+
+### Changed
+- Main window now uses tabbed layout instead of single grid
+- CPU tiles renamed to `cpuTiles` for clarity
+- Separate update goroutines for CPU and Memory monitoring
+- Window adapts to tabbed content structure
+
+### Technical Improvements
+- Modular memory monitoring component following existing tile pattern
+- Independent update loops for different metric types
+- Reuses existing graph rendering infrastructure
+- Follows established code organization patterns
+
 ## [0.4.1] - 2025-10-15
 
 ### Changed

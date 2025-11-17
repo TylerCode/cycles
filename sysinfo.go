@@ -118,3 +118,90 @@ func UpdateCPUInfo(tiles []*CoreTile) {
 		DrawGraph(tile.GraphImg, tile.UtilHistory)
 	}
 }
+
+// GetMemoryInfoDetailed returns detailed memory information including cached memory
+func GetMemoryInfoDetailed() (MemoryInfo, uint64, error) {
+	file, err := os.Open("/proc/meminfo")
+	if err != nil {
+		return MemoryInfo{}, 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var total, free, available, cached, buffers uint64
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "MemTotal:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				total, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		} else if strings.HasPrefix(line, "MemFree:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				free, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		} else if strings.HasPrefix(line, "MemAvailable:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				available, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		} else if strings.HasPrefix(line, "Cached:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				cached, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		} else if strings.HasPrefix(line, "Buffers:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				buffers, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return MemoryInfo{}, 0, err
+	}
+
+	// Calculate used memory (total - available gives a more accurate "used" value)
+	used := total - available
+
+	return MemoryInfo{
+		Total: total,
+		Used:  used,
+		Free:  free,
+	}, cached + buffers, nil
+}
+
+// UpdateMemoryInfo updates the memory information for memory tiles
+func UpdateMemoryInfo(tiles []*MemoryTile, historySize int) {
+	memInfo, cached, err := GetMemoryInfoDetailed()
+	if err != nil {
+		log.Printf("Error getting memory info: %v", err)
+		return
+	}
+
+	for _, tile := range tiles {
+		// Calculate usage percentage
+		usagePercent := 0.0
+		if memInfo.Total > 0 {
+			usagePercent = float64(memInfo.Used) / float64(memInfo.Total) * 100.0
+		}
+
+		// Update labels
+		tile.TotalLabel.SetText("Total: " + formatMemorySize(memInfo.Total))
+		tile.UsedLabel.SetText("Used: " + formatMemorySize(memInfo.Used))
+		tile.FreeLabel.SetText("Free: " + formatMemorySize(memInfo.Free))
+		tile.CachedLabel.SetText("Cached: " + formatMemorySize(cached))
+		tile.PercentLabel.SetText("Usage: " + formatMemoryPercent(usagePercent))
+
+		// Update usage history
+		tile.UsageHistory = append(tile.UsageHistory, usagePercent)
+		if len(tile.UsageHistory) > historySize {
+			tile.UsageHistory = tile.UsageHistory[1:]
+		}
+
+		// Draw graph
+		DrawGraph(tile.GraphImg, tile.UsageHistory)
+	}
+}

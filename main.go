@@ -43,22 +43,46 @@ func main() {
 		log.Fatalf("Error getting CPU core count: %v", err)
 	}
 
-	tiles := make([]*CoreTile, numCores)
+	cpuTiles := make([]*CoreTile, numCores)
 
-	// Create a grid container
-	grid := container.NewGridWithColumns(config.GridColumns)
+	// Create CPU grid container
+	cpuGrid := container.NewGridWithColumns(config.GridColumns)
 
 	for i := 0; i < numCores; i++ {
-		tiles[i] = NewCoreTile()
-		grid.Add(tiles[i].GetContainer())
+		cpuTiles[i] = NewCoreTile()
+		cpuGrid.Add(cpuTiles[i].GetContainer())
 	}
 
-	myWindow.SetContent(grid)
+	// Create memory tiles (overall memory + swap if available)
+	memoryTiles := make([]*MemoryTile, 0)
+	memoryTiles = append(memoryTiles, NewMemoryTile("System Memory"))
+
+	// Create memory grid container
+	memoryGrid := container.NewGridWithColumns(2)
+	for _, tile := range memoryTiles {
+		memoryGrid.Add(tile.GetContainer())
+	}
+
+	// Create tabs for CPU and Memory
+	tabs := container.NewAppTabs(
+		container.NewTabItem("CPU", cpuGrid),
+		container.NewTabItem("Memory", memoryGrid),
+	)
+
+	myWindow.SetContent(tabs)
 
 	// Update CPU info periodically
 	go func() {
 		for {
-			UpdateCPUInfo(tiles)
+			UpdateCPUInfo(cpuTiles)
+			time.Sleep(config.UpdateInterval)
+		}
+	}()
+
+	// Update Memory info periodically
+	go func() {
+		for {
+			UpdateMemoryInfo(memoryTiles, config.HistorySize)
 			time.Sleep(config.UpdateInterval)
 		}
 	}()
