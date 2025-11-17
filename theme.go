@@ -18,15 +18,20 @@ var (
 	RedDark    = color.RGBA{R: 252, G: 0, B: 13, A: 255}  // Dark theme red
 )
 
-// GetGraphLineColor returns the appropriate color based on utilization status and theme
-func GetGraphLineColor(status string) color.RGBA {
+// isDarkTheme checks if the current theme variant is dark
+func isDarkTheme() bool {
 	currentTheme := fyne.CurrentApp().Settings().Theme()
-	isDark := true
-
 	// Check if the current theme is light
 	if currentTheme == theme.LightTheme() {
-		isDark = false
+		return false
 	}
+	// Default to dark for most themes
+	return true
+}
+
+// GetGraphLineColor returns the appropriate color based on utilization status and theme
+func GetGraphLineColor(status string) color.RGBA {
+	isDark := isDarkTheme()
 
 	switch status {
 	case "green":
@@ -51,4 +56,9 @@ func GetGraphLineColor(status string) color.RGBA {
 		return GreenDark
 	}
 	return GreenLight
+}
+
+// ApplyTheme applies the specified theme variant to the application
+func ApplyTheme(app fyne.App, themeVariant fyne.ThemeVariant) {
+	app.Settings().SetTheme(&CustomTheme{variant: themeVariant})
 }

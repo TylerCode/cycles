@@ -17,7 +17,7 @@ type AppConfig struct {
 // DefaultConfig returns the default configuration
 func DefaultConfig() *AppConfig {
 	return &AppConfig{
-		Version:        "0.4.1",
+		Version:        "0.6.0",
 		GridColumns:    8,
 		UpdateInterval: 2 * time.Second,
 		HistorySize:    30,
