@@ -89,10 +89,12 @@ make run
 ```
 
 That's it! The `make setup` command will:
-- Detect your Linux distribution (Ubuntu/Debian, Fedora/RHEL, Arch)
+- Detect your Linux distribution (Ubuntu/Debian/Zorin/Pop, Fedora/RHEL, Arch)
 - Install all required system dependencies
 - Download and verify Go dependencies
 - Test that everything builds correctly
+
+**Note:** If your specific distribution isn't recognized, the script will automatically detect your package manager (apt-get, dnf, or pacman) and use the appropriate installation method.
 
 ### Manual Setup
 

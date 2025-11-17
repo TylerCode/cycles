@@ -77,7 +77,7 @@ install_arch_deps() {
 
 # Install system dependencies based on OS
 case "$OS" in
-    ubuntu|debian|pop|linuxmint)
+    ubuntu|debian|pop|linuxmint|zorin|elementary|neon)
         install_ubuntu_deps
         ;;
     fedora|rhel|centos|rocky|almalinux)
@@ -87,13 +87,25 @@ case "$OS" in
         install_arch_deps
         ;;
     *)
-        echo "Unsupported OS: $OS"
-        echo "Please install dependencies manually:"
-        echo "  - OpenGL development libraries"
-        echo "  - X11 development libraries (Xcursor, Xrandr, Xinerama, Xi)"
-        echo "  - GLFW development libraries"
-        echo "  - pkg-config, gcc, make"
-        exit 1
+        # Check if it's a derivative of Ubuntu/Debian by checking for apt-get
+        if command -v apt-get &> /dev/null; then
+            echo "Detected Debian/Ubuntu-based system (using apt-get)"
+            install_ubuntu_deps
+        elif command -v dnf &> /dev/null; then
+            echo "Detected Red Hat-based system (using dnf)"
+            install_fedora_deps
+        elif command -v pacman &> /dev/null; then
+            echo "Detected Arch-based system (using pacman)"
+            install_arch_deps
+        else
+            echo "Unsupported OS: $OS"
+            echo "Please install dependencies manually:"
+            echo "  - OpenGL development libraries"
+            echo "  - X11 development libraries (Xcursor, Xrandr, Xinerama, Xi)"
+            echo "  - GLFW development libraries"
+            echo "  - pkg-config, gcc, make"
+            exit 1
+        fi
         ;;
 esac
 

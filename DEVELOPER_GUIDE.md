@@ -193,9 +193,11 @@ Use the automated setup script which detects your OS and installs dependencies:
 ```
 
 Supported distributions:
-- Ubuntu/Debian/Pop!_OS/Linux Mint
-- Fedora/RHEL/CentOS/Rocky/AlmaLinux
-- Arch/Manjaro/EndeavourOS
+- **Ubuntu-based:** Ubuntu, Debian, Pop!_OS, Linux Mint, Zorin OS, Elementary OS, KDE neon
+- **Red Hat-based:** Fedora, RHEL, CentOS, Rocky Linux, AlmaLinux
+- **Arch-based:** Arch Linux, Manjaro, EndeavourOS
+
+**Note:** The script also has a smart fallback - if your distribution isn't explicitly listed, it will detect your package manager (apt-get, dnf, or pacman) and use the appropriate method automatically.
 
 #### Manual Setup
 
