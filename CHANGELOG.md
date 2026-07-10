@@ -5,6 +5,49 @@ All notable changes to the Cycles project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-07-10
+
+### Added
+- **CPU tab redesign**: replaced the fixed-column tile grid with a
+  responsive `GridWrap` layout that reflows column count as the window
+  resizes, plus a new List view (compact per-core rows with inline
+  utilization bars) toggleable from an aggregate stats strip
+  (Threads/Avg util/Peak core/Max clock).
+- **Memory tab redesign**: replaced the single memory tile with a full
+  dashboard — usage gauge, a used/cached/buffers/free/swap breakdown, and a
+  persistent area chart. Swap is now read from `/proc/meminfo`
+  (`SwapTotal`/`SwapFree`) and rendered for the first time.
+- Yellow utilization/warning band (previously defined in `theme.go` but
+  never rendered) is now wired up across CPU bars and the memory
+  breakdown's swap row.
+- Live theme switching now repaints custom `canvas.Text`/`canvas.Rectangle`
+  elements on the CPU and Memory tabs, which don't repaint themselves
+  automatically the way built-in widgets do.
+- `bar.go`: shared `Bar` component (a `fyne.Layout`-driven progress bar with
+  a fixed fill color) used by both the CPU list view and the Memory
+  breakdown rows.
+
+### Fixed
+- Build break from `fyne.Color`/`fyne.VariantLight`/`fyne.VariantDark`
+  (not real Fyne v2.4.2 types) in `settings.go`/`settingsui.go`.
+- Preferences silently not persisting — `main.go` now calls
+  `app.NewWithID("us.tylerc.cycles")` instead of `app.New()`, which Fyne's
+  Preferences API requires.
+- Infinite recursion / stack overflow on startup in `CustomTheme`, caused by
+  delegating color lookups to the app's current theme (itself) instead of
+  `theme.DefaultTheme()`.
+- Version-string drift between `config.go`, `snap/snapcraft.yaml`, and the
+  AppImage workflow — the AppImage workflow now derives its version from
+  `config.go` at build time instead of hardcoding it.
+- `snap/snapcraft.yaml` migrated from `base: core20` (no longer supported by
+  current Launchpad snapcraft) to `base: core22` with the `gpu` extension
+  replacing the old hand-rolled graphics content-interface plugs.
+
+### Changed
+- README and internal docs reconciled with actual current features (Memory
+  tab, Settings dialog, theme toggle); stale planning/retrospective docs
+  removed from repo root.
+
 ## [0.6.0] - 2025-11-17
 
 ### Added

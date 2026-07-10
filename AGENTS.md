@@ -14,9 +14,9 @@ job) so that a human stays accountable for every commit that lands. This
 applies across this project, not just to any one task.
 
 Guidance for AI coding agents working in this repository. This documents
-**current state as of 2026-07-10**, not the target state — the project is
-about to go through an overhaul, so treat everything here as "what exists
-today," which may be rewritten or removed.
+**current state as of 2026-07-10** (v0.8.0) — the UI overhaul described in
+"Overhaul roadmap" below is now complete (all phases 0–3 done); treat this
+as the settled architecture unless a new overhaul gets kicked off.
 
 ## What this project is
 
@@ -67,37 +67,47 @@ wrong, in case similar bugs get reintroduced during the overhaul:
    actual running binary** (`fyne.io/fyne/v2/test` covers widget
    construction in unit tests, e.g. the `TestMain` in `memorytile_test.go`,
    but not full app wiring like `ApplyTheme`).
-4. Version-string drift across `config.go` (0.6.0), `snap/snapcraft.yaml`
-   (was 0.4.1), and `.github/workflows/appimage.yml` (hardcoded 0.4.1 into
-   the artifact filename) — resolved by pinning snapcraft to 0.6.0 and
-   making the AppImage workflow derive `VERSION` from `config.go` at build
-   time instead of hardcoding it, so it can't drift again silently.
+4. Version-string drift across `config.go` (was 0.6.0 at the time),
+   `snap/snapcraft.yaml` (was 0.4.1), and `.github/workflows/appimage.yml`
+   (hardcoded 0.4.1 into the artifact filename) — resolved by pinning
+   snapcraft to match `config.go` and making the AppImage workflow derive
+   `VERSION` from `config.go` at build time instead of hardcoding it, so the
+   AppImage side can't drift again silently. `snap/snapcraft.yaml` still
+   needs a manual bump alongside `config.go` on every release — see
+   "Conventions worth preserving" below. Current version: 0.8.0.
 
-## Architecture (current)
+## Architecture (current, post-overhaul)
 
 Flat file-per-concern layout, no internal packages:
 
 | File | Responsibility |
 |---|---|
-| `main.go` | Entry point: config/settings load, window+menu setup, tile grids, update goroutines |
+| `main.go` | Entry point: config/settings load, window+menu setup, CPU tab + Memory dashboard wiring, theme-change listener, update goroutines |
 | `config.go` | `AppConfig` struct, defaults, CLI flag parsing (`--columns`, `--interval`, `--history`, `--logical`) |
-| `settings.go` | `Settings` struct — persisted via Fyne `Preferences` (theme, grid columns, history size, logical cores, update interval) |
+| `settings.go` | `Settings` struct — persisted via Fyne `Preferences` (theme, grid columns, history size, logical cores, update interval, CPU tab view mode) |
 | `settingsui.go` | Settings dialog (Fyne form) + `CustomTheme` wrapper type |
-| `theme.go` | Graph line colors per utilization band (green/yellow/red) x light/dark, `ApplyTheme()` |
-| `tile.go` | `CoreTile` — one CPU core's UI tile (labels + history graph) |
-| `memorytile.go` | `MemoryTile` — memory UI tile + byte-size/percent formatters |
-| `sysinfo.go` | Reads `/proc/cpuinfo` and `/proc/meminfo` directly (not via gopsutil, deliberately — see DEVELOPER_GUIDE.md "Architecture Decisions"); `UpdateCPUInfo` / `UpdateMemoryInfo` mutate tile slices in place |
-| `graphics.go` | `DrawGraph` (line chart into an `image.RGBA`), Bresenham line drawing, label formatters |
+| `theme.go` | `GetGraphLineColor`/`GetSeriesColor` (green/yellow/red status colors plus named chart series colors) x light/dark, `UtilizationStatus()` thresholds, `ApplyTheme()` |
+| `cputab.go` | `CPUTab` — owns the whole CPU tab: aggregate stats strip (Threads/Avg util/Peak core/Max clock), Tiles/List view toggle, both view containers |
+| `tile.go` | `CoreState` (per-core data, shared by both views) + `CoreTile` (Tiles view card, responsive `GridWrap` cell) + `CoreListRow` (List view row with inline `Bar`) |
+| `memorytile.go` | `MemoryDashboard` — the whole Memory tab: radial usage gauge, used/cached/buffers/free/swap breakdown rows, full-width history area chart; byte-size/percent formatters |
+| `bar.go` | `Bar` — a `fyne.Layout`-driven horizontal progress bar with a fixed fill color, shared by the CPU list view and the Memory breakdown rows |
+| `sysinfo.go` | Reads `/proc/cpuinfo` and `/proc/meminfo` directly (not via gopsutil, deliberately — see DEVELOPER_GUIDE.md "Architecture Decisions"), including swap (`SwapTotal`/`SwapFree`); `UpdateCPUInfo` / `UpdateMemoryInfo` push samples into `CoreState`/`MemoryDashboard` |
+| `graphics.go` | `DrawSparkline`, `DrawAreaChart` (memory+swap dual-series), `DrawRadialGauge` — all render into an `image.RGBA` at their actual requested size (no more fixed-bitmap graphs), Bresenham line drawing, label formatters |
 | `info.go` | About-dialog text: app version + OS/arch/Go version |
 | `*_test.go` | One test file per corresponding source file |
 
 Runtime shape: `main()` builds a config, loads/merges `Settings` from Fyne
-preferences (CLI flags override saved settings), builds two Fyne tab pages
-(CPU grid, Memory grid), and spins up two independent polling goroutines
-(`time.Sleep(config.UpdateInterval)` loops) that mutate tile widgets from a
-background goroutine and call `.SetText()` / redraw directly — **no
+preferences (CLI flags override saved settings), builds the CPU tab
+(`NewCPUTab`) and Memory dashboard (`NewMemoryDashboard`) as Fyne tab pages,
+and spins up two independent polling goroutines (`time.Sleep
+(config.UpdateInterval)` loops) that mutate widgets from a background
+goroutine and call `.Refresh()` / redraw directly — **no
 synchronization/locking around cross-goroutine UI mutation**, relies on
-Fyne's internal thread-safety of widget updates.
+Fyne's internal thread-safety of widget updates. A separate goroutine
+listens for app theme changes and pushes `RefreshTheme()` through both tabs,
+since `canvas.Text`/`canvas.Rectangle` primitives only read theme colors
+once at construction and don't repaint themselves on a live theme switch the
+way built-in widgets do.
 
 `gopsutil` (`github.com/shirou/gopsutil`, the v1-style import path, not
 `v3`/`v4` module path despite `go.mod` saying `v3.21.11+incompatible`) is
@@ -147,13 +157,18 @@ package dependencies (X11/GL dev headers) are required to build at all — see
 per-distro package list.
 
 Test coverage exists for `config.go`, `graphics.go`, `info.go`,
-`memorytile.go`, `settings.go` (one `_test.go` each), all passing.
-`memorytile_test.go` has a package-level `TestMain` that boots a headless
-`fyne.io/fyne/v2/test` app — needed because widget constructors that call
-`theme.BackgroundColor()` (e.g. `NewMemoryTile`, and `NewCoreTile` if it
-ever gets tests) panic without a `fyne.CurrentApp()` in scope. Any new test
+`memorytile.go`, `settings.go`, `sysinfo.go` (one `_test.go` each), all
+passing. `memorytile_test.go` has a package-level `TestMain` that boots a
+headless `fyne.io/fyne/v2/test` app — needed because widget constructors
+that call `theme.BackgroundColor()` (e.g. `NewMemoryDashboard`,
+`NewCoreTile`) panic without a `fyne.CurrentApp()` in scope. Any new test
 that constructs a Fyne widget touching theme colors relies on that same
-`TestMain`, so keep it if you add or move test files.
+`TestMain`, so keep it if you add or move test files. `tile.go`, `bar.go`,
+and `cputab.go` (all added in the Phase 3 UI overhaul) currently have **no**
+dedicated test files — their logic is mostly Fyne widget wiring rather than
+pure functions, but `CoreState.Update`'s history-trimming and
+`ComputeCPUAggregateStats` (tested indirectly via `sysinfo_test.go`) would
+be reasonable candidates if gaps here start to matter.
 
 ## Conventions worth preserving
 
@@ -189,24 +204,64 @@ attempting the larger UI overhaul. Roughly in order:
    0.6.0, `.github/workflows/appimage.yml` now derives its version from
    `config.go` instead of hardcoding it.
 
-**Phase 1 — surface cleanup** (docs done 2026-07-10; rest pending)
+**Phase 1 — surface cleanup — done 2026-07-10**
 5. ~~Purge stale planning docs.~~ Done.
 6. ~~Reconcile README against real features.~~ Done.
-7. Orphaned Flatpak manifest at repo root — currently just parked, no action
-   taken yet.
+7. Orphaned Flatpak manifest at repo root — deliberately deferred by the
+   owner ("I'll come back to flatpak eventually"), not a bug, don't touch
+   without being asked. (Still true post-overhaul; not part of this phase's
+   done/pending accounting.)
 
-**Phase 2 — harden Snap (the priority channel over Flatpak)**
-8. `snap/snapcraft.yaml` is on `base: core20`; consider moving to a current base.
-9. No CI builds/tests the Snap package today — only AppImage + repo-archive
-   workflows exist under `.github/workflows/`.
-10. Verify whether AppImage is actually broken as older docs claimed, rather
-    than assuming — there is a working-looking GH Action for it already.
+**Phase 2 — harden Snap (the priority channel over Flatpak) — done 2026-07-10**
+8. ~~`snap/snapcraft.yaml` was on `base: core20`.~~ Done — Launchpad's
+   snapcraft (9.0.1) had actually dropped `core20` support entirely
+   (`Base 'core20' is not supported by this version of Snapcraft`), so this
+   wasn't optional hardening, it was a real outage: Snap builds were failing
+   before ever reaching this repo's source. Migrated to `base: core22` with
+   the `extensions: [gpu]` app extension replacing the old hand-rolled
+   `graphics-core20`/`mesa-core20` content-interface plugs/layout/environment
+   blocks, plus an explicit `build-snaps: [go/1.21/stable]` (Go is no longer
+   bundled by the plugin under core22). Confirmed working — owner reports a
+   successful Launchpad build and working auto-builds.
+9. ~~No CI builds/tests the Snap package today.~~ Resolved as a side effect
+   of #8 — Launchpad auto-builds are the CI for this channel and are
+   confirmed working again.
+10. ~~Verify whether AppImage is actually broken.~~ Confirmed fixed per
+    GitHub Actions — the version-drift fix from Phase 0 was sufficient,
+    it wasn't independently broken.
 
-**Phase 3 — UI overhaul**
-11. Current layout is a static Fyne grid that doesn't scale or let users
-    rearrange tiles — this is the main motivation for the overhaul. Open
-    decision: rebuild the layout within Fyne (responsive/reflowing
-    container) vs. reassess whether Fyne is still the right toolkit at all.
-    Don't assume either answer — this needs a deliberate call before code.
-12. Define what "good" looks like (resizable/reflowing grid? drag-to-rearrange?
-    separate panels per metric type?) before implementation.
+**Phase 3 — UI overhaul — done 2026-07-10 (shipping as v0.8.0)**
+11. ~~Decide Fyne vs. reassessing the toolkit.~~ Decided 2026-07-10: **staying
+    on Fyne.** Owner has since built two other substantial Fyne projects and
+    has real accumulated expertise there now (though nothing directly
+    reusable in this repo) — this isn't a default/inertia choice, it's an
+    informed one. Current layout is still a static Fyne grid that doesn't
+    scale or let users rearrange tiles; the fix is a better layout within
+    Fyne, not a framework change.
+12. ~~Define what "good" looks like before implementation.~~ Done — see
+    `design.md` (the design brief that was handed to a design-focused
+    conversation, with `design/` holding the resulting mockup/reference
+    material) for the full spec both tabs below were built against.
+13. ~~Implement the Memory tab redesign.~~ Done — `memorytile.go`'s
+    `MemoryDashboard` replaced the old single-tile grid with a radial usage
+    gauge, a used/cached/buffers/free/**swap** breakdown (swap is now read
+    via `parseMemInfo` in `sysinfo.go`), and a full-width dual-series
+    (memory + swap) history area chart (`DrawAreaChart` in `graphics.go`).
+    The yellow status band in `theme.go` is now actually wired up (swap
+    row + CPU utilization bars).
+14. ~~Implement the CPU tab redesign.~~ Done — `cputab.go`'s `CPUTab` adds
+    an aggregate stats strip (Threads/Avg util/Peak core/Max clock) and a
+    Tiles/List view toggle (persisted via `Settings.ViewMode`). Tiles use a
+    responsive `container.NewGridWrap` that reflows column count with window
+    width instead of a fixed-column grid; List view (`tile.go`'s
+    `CoreListRow`) is a compact two-column row layout with an inline `Bar`
+    (`bar.go`) for utilization. Graphs (`DrawSparkline`) now render at their
+    actual displayed raster size instead of a fixed 120×50px bitmap.
+15. Both tabs' custom `canvas.Text`/`canvas.Rectangle` elements needed an
+    explicit `RefreshTheme()` pass wired into `main.go`'s theme-change
+    listener, since — unlike built-in widgets — they don't repaint
+    themselves on a live theme switch. Same underlying issue as the
+    `CustomTheme` recursion bug in Phase 0, different symptom.
+
+No further phases are currently planned. If a new UI/feature initiative
+starts, prefer adding a new dated section here over resurrecting this one.

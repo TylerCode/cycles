@@ -23,9 +23,6 @@ func main() {
 	settings := NewSettings(myApp)
 
 	// Command-line flags override saved settings
-	if config.GridColumns != 8 {
-		settings.GridColumns = config.GridColumns
-	}
 	if config.UpdateInterval != 2*time.Second {
 		settings.UpdateInterval = config.UpdateInterval
 	}
@@ -60,21 +57,9 @@ func main() {
 		})
 	})
 
-	// View menu for quick theme toggle
-	themeToggleItem := fyne.NewMenuItem("Toggle Theme", func() {
-		if settings.Theme == "dark" {
-			settings.Theme = "light"
-		} else {
-			settings.Theme = "dark"
-		}
-		settings.Save()
-		ApplyTheme(myApp, settings.GetThemeVariant())
-	})
-
 	helpMenu := fyne.NewMenu("Help", aboutItem)
 	fileMenu := fyne.NewMenu("File", settingsItem)
-	viewMenu := fyne.NewMenu("View", themeToggleItem)
-	mainMenu := fyne.NewMainMenu(fileMenu, viewMenu, helpMenu)
+	mainMenu := fyne.NewMainMenu(fileMenu, helpMenu)
 	myWindow.SetMainMenu(mainMenu)
 
 	// Determine the number of CPU cores
@@ -83,38 +68,41 @@ func main() {
 		log.Fatalf("Error getting CPU core count: %v", err)
 	}
 
-	cpuTiles := make([]*CoreTile, numCores)
+	cpuTab := NewCPUTab(numCores, settings.ViewMode, func(view string) {
+		settings.ViewMode = view
+		settings.Save()
+	})
 
-	// Create CPU grid container
-	cpuGrid := container.NewGridWithColumns(config.GridColumns)
-
-	for i := 0; i < numCores; i++ {
-		cpuTiles[i] = NewCoreTile()
-		cpuGrid.Add(cpuTiles[i].GetContainer())
-	}
-
-	// Create memory tiles (overall memory + swap if available)
-	memoryTiles := make([]*MemoryTile, 0)
-	memoryTiles = append(memoryTiles, NewMemoryTile("System Memory"))
-
-	// Create memory grid container
-	memoryGrid := container.NewGridWithColumns(2)
-	for _, tile := range memoryTiles {
-		memoryGrid.Add(tile.GetContainer())
-	}
+	memoryDashboard := NewMemoryDashboard()
 
 	// Create tabs for CPU and Memory
 	tabs := container.NewAppTabs(
-		container.NewTabItem("CPU", cpuGrid),
-		container.NewTabItem("Memory", memoryGrid),
+		container.NewTabItem("CPU", cpuTab.Content),
+		container.NewTabItem("Memory", memoryDashboard.GetContainer()),
 	)
 
 	myWindow.SetContent(tabs)
+	myWindow.Resize(fyne.NewSize(1280, 800))
+
+	// canvas.Text/Rectangle primitives (used throughout the CPU/Memory tabs
+	// for custom-colored drawing) only read theme colors once, at
+	// construction — unlike built-in widgets, they don't repaint themselves
+	// when the app theme changes live. Listen for theme changes and push a
+	// refresh through both tabs so switching themes doesn't require a
+	// restart.
+	themeChanges := make(chan fyne.Settings)
+	myApp.Settings().AddChangeListener(themeChanges)
+	go func() {
+		for range themeChanges {
+			cpuTab.RefreshTheme()
+			memoryDashboard.RefreshTheme()
+		}
+	}()
 
 	// Update CPU info periodically
 	go func() {
 		for {
-			UpdateCPUInfo(cpuTiles)
+			UpdateCPUInfo(cpuTab.Cores, config.HistorySize, cpuTab.UpdateStats)
 			time.Sleep(config.UpdateInterval)
 		}
 	}()
@@ -122,7 +110,7 @@ func main() {
 	// Update Memory info periodically
 	go func() {
 		for {
-			UpdateMemoryInfo(memoryTiles, config.HistorySize)
+			UpdateMemoryInfo(memoryDashboard, config.HistorySize)
 			time.Sleep(config.UpdateInterval)
 		}
 	}()

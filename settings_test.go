@@ -15,10 +15,10 @@ func TestSettingsDefaults(t *testing.T) {
 	tests := []struct {
 		name     string
 		field    string
-		expected interface{}
+		expected any
 	}{
 		{"Default Theme", "Theme", "auto"},
-		{"Default Grid Columns", "GridColumns", 8},
+		{"Default View Mode", "ViewMode", "tiles"},
 		{"Default History Size", "HistorySize", 30},
 		{"Default Logical Cores", "LogicalCores", true},
 		{"Default Update Interval", "UpdateInterval", 2 * time.Second},
@@ -65,7 +65,6 @@ func TestGetThemeVariant(t *testing.T) {
 
 func TestApplyToConfig(t *testing.T) {
 	s := &Settings{
-		GridColumns:    12,
 		HistorySize:    50,
 		LogicalCores:   false,
 		UpdateInterval: 3 * time.Second,
@@ -74,9 +73,6 @@ func TestApplyToConfig(t *testing.T) {
 	config := DefaultConfig()
 	s.ApplyToConfig(config)
 
-	if config.GridColumns != 12 {
-		t.Errorf("Expected GridColumns=12, got %d", config.GridColumns)
-	}
 	if config.HistorySize != 50 {
 		t.Errorf("Expected HistorySize=50, got %d", config.HistorySize)
 	}
@@ -90,7 +86,6 @@ func TestApplyToConfig(t *testing.T) {
 
 func TestLoadFromConfig(t *testing.T) {
 	config := &AppConfig{
-		GridColumns:    16,
 		HistorySize:    100,
 		LogicalCores:   true,
 		UpdateInterval: 5 * time.Second,
@@ -99,9 +94,6 @@ func TestLoadFromConfig(t *testing.T) {
 	s := &Settings{}
 	s.LoadFromConfig(config)
 
-	if s.GridColumns != 16 {
-		t.Errorf("Expected GridColumns=16, got %d", s.GridColumns)
-	}
 	if s.HistorySize != 100 {
 		t.Errorf("Expected HistorySize=100, got %d", s.HistorySize)
 	}

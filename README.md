@@ -2,7 +2,7 @@
 [![Build AppImage](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml/badge.svg)](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml)
 
 # cycles
-Desktop CPU Monitor I threw together while trying to debug some issues with my computer. Have not been dedicating a lot of time to this lately since I'm not on a machine with Snap access anymore. 
+Desktop CPU Monitor I threw together while trying to debug some issues with my computer. Currently working on a small overhaul of the UI. 
 
 ![image](https://github.com/TylerCode/cycles/assets/18288340/36332a79-6882-4204-ba6d-51d061798229)
 

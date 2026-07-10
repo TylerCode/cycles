@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -12,9 +13,55 @@ import (
 
 // MemoryInfo represents memory statistics
 type MemoryInfo struct {
+	Total   uint64
+	Used    uint64
+	Free    uint64
+	Cached  uint64
+	Buffers uint64
+}
+
+// SwapInfo represents swap statistics (in kB, matching /proc/meminfo units)
+type SwapInfo struct {
 	Total uint64
 	Used  uint64
 	Free  uint64
+}
+
+// CPUAggregateStats summarizes per-core stats into the CPU tab's stats strip
+type CPUAggregateStats struct {
+	Threads       int
+	AvgUtil       float64
+	PeakCoreIndex int
+	PeakCoreUtil  float64
+	MaxClock      float64
+}
+
+// ComputeCPUAggregateStats computes aggregate stats from per-core utilization
+// percentages and clock frequencies (as returned by cpu.Percent and
+// GetCPUFrequencies).
+func ComputeCPUAggregateStats(percent, freqs []float64) CPUAggregateStats {
+	stats := CPUAggregateStats{Threads: len(percent)}
+	if len(percent) == 0 {
+		return stats
+	}
+
+	var total float64
+	for i, p := range percent {
+		total += p
+		if p > stats.PeakCoreUtil {
+			stats.PeakCoreUtil = p
+			stats.PeakCoreIndex = i
+		}
+	}
+	stats.AvgUtil = total / float64(len(percent))
+
+	for _, f := range freqs {
+		if f > stats.MaxClock {
+			stats.MaxClock = f
+		}
+	}
+
+	return stats
 }
 
 // GetCPUFrequencies reads CPU frequencies from /proc/cpuinfo
@@ -84,8 +131,9 @@ func GetMemoryInfo() (MemoryInfo, error) {
 	}, nil
 }
 
-// UpdateCPUInfo updates the CPU information for all tiles
-func UpdateCPUInfo(tiles []*CoreTile) {
+// UpdateCPUInfo updates every core's state (feeding both the tile and list
+// representations) and the CPU tab's aggregate stats strip.
+func UpdateCPUInfo(cores []*CoreState, historySize int, onStats func(CPUAggregateStats)) {
 	percent, err := cpu.Percent(0, true)
 	if err != nil {
 		log.Printf("Error getting CPU percent: %v", err)
@@ -98,37 +146,42 @@ func UpdateCPUInfo(tiles []*CoreTile) {
 		return
 	}
 
-	for i, tile := range tiles {
+	for i, core := range cores {
 		if i >= len(percent) || i >= len(freqs) {
 			continue
 		}
 
-		// Update labels
-		tile.CoreLabel.SetText(formatCoreLabel(i))
-		tile.UtilLabel.SetText(formatUtilLabel(percent[i]))
-		tile.ClockLabel.SetText(formatClockLabel(freqs[i]))
+		core.Update(percent[i], freqs[i], historySize)
+	}
 
-		// Update utilization history
-		tile.UtilHistory = append(tile.UtilHistory, percent[i])
-		if len(tile.UtilHistory) > 30 { // Keep only the last 30 measurements
-			tile.UtilHistory = tile.UtilHistory[1:]
-		}
-
-		// Draw graph
-		DrawGraph(tile.GraphImg, tile.UtilHistory)
+	if onStats != nil {
+		onStats(ComputeCPUAggregateStats(percent, freqs))
 	}
 }
 
-// GetMemoryInfoDetailed returns detailed memory information including cached memory
-func GetMemoryInfoDetailed() (MemoryInfo, uint64, error) {
+// GetMemoryInfoDetailed returns detailed memory information (including
+// cached/buffers, broken out separately) and swap information, both read
+// from /proc/meminfo.
+//
+// Used is computed as total-free-cached-buffers (rather than total-available)
+// so that Used+Cached+Buffers+Free sums to Total — required for the memory
+// breakdown bars, which visualize those four components as parts of a whole.
+func GetMemoryInfoDetailed() (MemoryInfo, SwapInfo, error) {
 	file, err := os.Open("/proc/meminfo")
 	if err != nil {
-		return MemoryInfo{}, 0, err
+		return MemoryInfo{}, SwapInfo{}, err
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	var total, free, available, cached, buffers uint64
+	return parseMemInfo(file)
+}
+
+// parseMemInfo parses /proc/meminfo-formatted content into memory and swap
+// stats. Split out from GetMemoryInfoDetailed so the parsing logic can be
+// tested against a fixture without touching the filesystem.
+func parseMemInfo(r io.Reader) (MemoryInfo, SwapInfo, error) {
+	scanner := bufio.NewScanner(r)
+	var total, free, cached, buffers, swapTotal, swapFree uint64
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "MemTotal:") {
@@ -141,11 +194,6 @@ func GetMemoryInfoDetailed() (MemoryInfo, uint64, error) {
 			if len(parts) == 3 {
 				free, _ = strconv.ParseUint(parts[1], 10, 64)
 			}
-		} else if strings.HasPrefix(line, "MemAvailable:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				available, _ = strconv.ParseUint(parts[1], 10, 64)
-			}
 		} else if strings.HasPrefix(line, "Cached:") {
 			parts := strings.Fields(line)
 			if len(parts) == 3 {
@@ -156,52 +204,69 @@ func GetMemoryInfoDetailed() (MemoryInfo, uint64, error) {
 			if len(parts) == 3 {
 				buffers, _ = strconv.ParseUint(parts[1], 10, 64)
 			}
+		} else if strings.HasPrefix(line, "SwapTotal:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				swapTotal, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
+		} else if strings.HasPrefix(line, "SwapFree:") {
+			parts := strings.Fields(line)
+			if len(parts) == 3 {
+				swapFree, _ = strconv.ParseUint(parts[1], 10, 64)
+			}
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		return MemoryInfo{}, 0, err
+		return MemoryInfo{}, SwapInfo{}, err
 	}
 
-	// Calculate used memory (total - available gives a more accurate "used" value)
-	used := total - available
+	used := total - free - cached - buffers
 
-	return MemoryInfo{
-		Total: total,
-		Used:  used,
-		Free:  free,
-	}, cached + buffers, nil
+	memInfo := MemoryInfo{
+		Total:   total,
+		Used:    used,
+		Free:    free,
+		Cached:  cached,
+		Buffers: buffers,
+	}
+	swapInfo := SwapInfo{
+		Total: swapTotal,
+		Free:  swapFree,
+		Used:  swapTotal - swapFree,
+	}
+
+	return memInfo, swapInfo, nil
 }
 
-// UpdateMemoryInfo updates the memory information for memory tiles
-func UpdateMemoryInfo(tiles []*MemoryTile, historySize int) {
-	memInfo, cached, err := GetMemoryInfoDetailed()
+// UpdateMemoryInfo updates the memory dashboard with the latest memory and
+// swap statistics.
+func UpdateMemoryInfo(dashboard *MemoryDashboard, historySize int) {
+	memInfo, swapInfo, err := GetMemoryInfoDetailed()
 	if err != nil {
 		log.Printf("Error getting memory info: %v", err)
 		return
 	}
 
-	for _, tile := range tiles {
-		// Calculate usage percentage
-		usagePercent := 0.0
-		if memInfo.Total > 0 {
-			usagePercent = float64(memInfo.Used) / float64(memInfo.Total) * 100.0
-		}
-
-		// Update labels
-		tile.TotalLabel.SetText("Total: " + formatMemorySize(memInfo.Total))
-		tile.UsedLabel.SetText("Used: " + formatMemorySize(memInfo.Used))
-		tile.FreeLabel.SetText("Free: " + formatMemorySize(memInfo.Free))
-		tile.CachedLabel.SetText("Cached: " + formatMemorySize(cached))
-		tile.PercentLabel.SetText("Usage: " + formatMemoryPercent(usagePercent))
-
-		// Update usage history
-		tile.UsageHistory = append(tile.UsageHistory, usagePercent)
-		if len(tile.UsageHistory) > historySize {
-			tile.UsageHistory = tile.UsageHistory[1:]
-		}
-
-		// Draw graph
-		DrawGraph(tile.GraphImg, tile.UsageHistory)
+	usagePercent := 0.0
+	if memInfo.Total > 0 {
+		usagePercent = float64(memInfo.Used) / float64(memInfo.Total) * 100.0
 	}
+
+	swapPercent := 0.0
+	if swapInfo.Total > 0 {
+		swapPercent = float64(swapInfo.Used) / float64(swapInfo.Total) * 100.0
+	}
+
+	dashboard.UsageHistory = append(dashboard.UsageHistory, usagePercent)
+	if len(dashboard.UsageHistory) > historySize {
+		dashboard.UsageHistory = dashboard.UsageHistory[1:]
+	}
+
+	dashboard.SwapHistory = append(dashboard.SwapHistory, swapPercent)
+	if len(dashboard.SwapHistory) > historySize {
+		dashboard.SwapHistory = dashboard.SwapHistory[1:]
+	}
+
+	dashboard.Update(memInfo, swapInfo, usagePercent, swapPercent)
 }

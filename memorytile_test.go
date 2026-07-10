@@ -14,48 +14,29 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestNewMemoryTile(t *testing.T) {
-	tile := NewMemoryTile("Test Memory")
+func TestNewMemoryDashboard(t *testing.T) {
+	dashboard := NewMemoryDashboard()
 
-	if tile == nil {
-		t.Fatal("NewMemoryTile returned nil")
+	if dashboard == nil {
+		t.Fatal("NewMemoryDashboard returned nil")
 	}
 
-	if tile.TitleLabel == nil {
-		t.Error("TitleLabel is nil")
-	}
-
-	if tile.TotalLabel == nil {
-		t.Error("TotalLabel is nil")
-	}
-
-	if tile.UsedLabel == nil {
-		t.Error("UsedLabel is nil")
-	}
-
-	if tile.FreeLabel == nil {
-		t.Error("FreeLabel is nil")
-	}
-
-	if tile.CachedLabel == nil {
-		t.Error("CachedLabel is nil")
-	}
-
-	if tile.PercentLabel == nil {
-		t.Error("PercentLabel is nil")
-	}
-
-	if tile.GraphImg == nil {
-		t.Error("GraphImg is nil")
-	}
-
-	if tile.GetContainer() == nil {
+	if dashboard.GetContainer() == nil {
 		t.Error("GetContainer returned nil")
 	}
+}
 
-	// Check initial label text
-	if tile.TitleLabel.Text != "Test Memory" {
-		t.Errorf("Expected title 'Test Memory', got '%s'", tile.TitleLabel.Text)
+func TestMemoryDashboardUpdate(t *testing.T) {
+	dashboard := NewMemoryDashboard()
+
+	mem := MemoryInfo{Total: 1000, Used: 200, Cached: 700, Buffers: 50, Free: 50}
+	swap := SwapInfo{Total: 100, Used: 10, Free: 90}
+
+	// Update should not panic and should record the percentages passed in.
+	dashboard.Update(mem, swap, 20.0, 10.0)
+
+	if dashboard.gaugePercent != 20.0 {
+		t.Errorf("Expected gaugePercent=20.0, got %v", dashboard.gaugePercent)
 	}
 }
 
@@ -97,14 +78,5 @@ func TestFormatMemoryPercent(t *testing.T) {
 		if result != tt.expected {
 			t.Errorf("formatMemoryPercent(%.3f) = %s; want %s", tt.percent, result, tt.expected)
 		}
-	}
-}
-
-func TestMemoryTileGetContainer(t *testing.T) {
-	tile := NewMemoryTile("Test")
-	container := tile.GetContainer()
-
-	if container == nil {
-		t.Error("GetContainer() returned nil")
 	}
 }

@@ -13,7 +13,7 @@ type Settings struct {
 
 	// Display settings
 	Theme        string // "auto", "light", "dark"
-	GridColumns  int
+	ViewMode     string // "tiles", "list" — CPU tab view
 	HistorySize  int
 	LogicalCores bool
 
@@ -37,8 +37,8 @@ func (s *Settings) Load() {
 	// Load theme setting (default: "auto")
 	s.Theme = prefs.StringWithFallback("theme", "auto")
 
-	// Load grid columns (default: 8)
-	s.GridColumns = prefs.IntWithFallback("grid_columns", 8)
+	// Load CPU tab view mode (default: "tiles")
+	s.ViewMode = prefs.StringWithFallback("view_mode", "tiles")
 
 	// Load history size (default: 30)
 	s.HistorySize = prefs.IntWithFallback("history_size", 30)
@@ -56,7 +56,7 @@ func (s *Settings) Save() {
 	prefs := s.app.Preferences()
 
 	prefs.SetString("theme", s.Theme)
-	prefs.SetInt("grid_columns", s.GridColumns)
+	prefs.SetString("view_mode", s.ViewMode)
 	prefs.SetInt("history_size", s.HistorySize)
 	prefs.SetBool("logical_cores", s.LogicalCores)
 
@@ -68,7 +68,7 @@ func (s *Settings) Save() {
 // Reset resets all settings to default values
 func (s *Settings) Reset() {
 	s.Theme = "auto"
-	s.GridColumns = 8
+	s.ViewMode = "tiles"
 	s.HistorySize = 30
 	s.LogicalCores = true
 	s.UpdateInterval = 2 * time.Second
@@ -77,7 +77,6 @@ func (s *Settings) Reset() {
 
 // ApplyToConfig applies settings to an AppConfig
 func (s *Settings) ApplyToConfig(config *AppConfig) {
-	config.GridColumns = s.GridColumns
 	config.HistorySize = s.HistorySize
 	config.LogicalCores = s.LogicalCores
 	config.UpdateInterval = s.UpdateInterval
@@ -86,7 +85,6 @@ func (s *Settings) ApplyToConfig(config *AppConfig) {
 // LoadFromConfig loads settings from an AppConfig
 // This is used to populate settings from command-line flags
 func (s *Settings) LoadFromConfig(config *AppConfig) {
-	s.GridColumns = config.GridColumns
 	s.HistorySize = config.HistorySize
 	s.LogicalCores = config.LogicalCores
 	s.UpdateInterval = config.UpdateInterval
