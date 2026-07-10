@@ -8,37 +8,12 @@ icon: snap/gui/icon.png
 grade: stable
 confinement: strict
 
-base: core20
-
-plugs:
-  graphics-core20:
-    interface: content
-    target: $SNAP/graphics
-    default-provider: mesa-core20
-
-layout:
-  /usr/share/X11/xkb:
-    bind: $SNAP/usr/share/X11/xkb
-  /etc/glvnd:
-    bind: $SNAP/etc/glvnd
-  /usr/lib/${SNAPCRAFT_ARCH_TRIPLET}/dri:
-    bind: $SNAP/graphics/dri
-  /usr/share/glvnd:
-    bind: $SNAP/graphics/glvnd
-  /usr/share/libdrm:
-    bind: $SNAP/graphics/libdrm
-  /usr/share/drirc.d:
-   bind: $SNAP/graphics/drirc.d
-
-environment:
-  LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/graphics/dri:$SNAP/graphics/lib:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/xorg:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
-  LIBGL_DRIVERS_PATH: $SNAP/graphics/dri
-  __EGL_VENDOR_LIBRARY_DIRS: $SNAP/graphics/glvnd/egl_vendor.d
-  EGL_PLATFORM: wayland
+base: core22
 
 apps:
   tylercode-cycles:
     command: bin/cycles
+    extensions: [gpu]
     plugs:
       - desktop
       - desktop-legacy
@@ -47,16 +22,15 @@ apps:
       - wayland
       - unity7
       - pulseaudio
-      - opengl
-      - graphics-core20
 
 parts:
   tylercode-cycles:
     source: .
     plugin: go
+    build-snaps:
+      - go/1.21/stable
     build-packages:
       - libgl1-mesa-dev
-      - libgl1-mesa-glx
       - libx11-dev
       - libxrandr-dev
       - libxinerama-dev
@@ -65,12 +39,8 @@ parts:
       - libxi-dev
       - pkg-config
     stage-packages:
-      - libgl1-mesa-glx
       - libx11-6
       - libxinerama1
-      - libxxf86vm-dev
-      - libglu1-mesa
-      - libgles2-mesa
       - libxcursor1
       - libxi6
       - libxrandr2
