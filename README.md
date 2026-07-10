@@ -18,15 +18,16 @@ The ultimate goal is to have something more akin to the performance tab in Windo
 
 ## Features
 - Displays CPU core utilization and frequency in real-time
+- Memory tab showing total/used/free/cached memory with a usage graph
+- Settings dialog (File > Preferences) for grid columns, history size, update interval, and logical/physical core display, persisted between runs
+- Light/dark/auto theme, with a quick toggle in the View menu
 - Customizable update interval (default: every 2 seconds)
 - Utilization graphs showing historical data
-- Command-line flags for customization:
-  - `--columns`: Number of columns in the grid layout (default: 4)
+- Command-line flags for customization (override saved settings):
+  - `--columns`: Number of columns in the grid layout (default: 8)
   - `--interval`: Update interval (default: 2s)
   - `--history`: Number of historical data points to keep (default: 30)
   - `--logical`: Show logical cores vs physical cores (default: true)
-- Improved error handling and logging
-- Modular code structure for easier maintenance
 
 
 ## Installation
@@ -39,10 +40,6 @@ Currently, this application is only available on x86 machines running linux. ARM
 sudo snap install tylercode-cycles
 ```
 - A "Release" build will be out once I've tested it on a few other machines.
-
-
-### FlatPak
-- Coming in 0.5
 
 
 ### AppImage
