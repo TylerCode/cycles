@@ -1,8 +1,18 @@
 package main
 
 import (
+	"os"
 	"testing"
+
+	"fyne.io/fyne/v2/test"
 )
+
+// TestMain starts a headless Fyne test app so widget constructors that read
+// theme colors (e.g. theme.BackgroundColor()) don't panic on a nil current app.
+func TestMain(m *testing.M) {
+	test.NewApp()
+	os.Exit(m.Run())
+}
 
 func TestNewMemoryTile(t *testing.T) {
 	tile := NewMemoryTile("Test Memory")

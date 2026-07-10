@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/theme"
 )
 
 // Settings represents user preferences for the application
@@ -95,10 +96,10 @@ func (s *Settings) LoadFromConfig(config *AppConfig) {
 func (s *Settings) GetThemeVariant() fyne.ThemeVariant {
 	switch s.Theme {
 	case "light":
-		return fyne.VariantLight
+		return theme.VariantLight
 	case "dark":
-		return fyne.VariantDark
+		return theme.VariantDark
 	default: // "auto"
-		return fyne.VariantDark // Default to dark, can be enhanced to detect system theme
+		return theme.VariantDark // Default to dark, can be enhanced to detect system theme
 	}
 }

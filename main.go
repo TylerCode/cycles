@@ -17,7 +17,7 @@ func main() {
 	config := DefaultConfig()
 	config.ParseFlags()
 
-	myApp := app.New()
+	myApp := app.NewWithID("us.tylerc.cycles")
 
 	// Load settings
 	settings := NewSettings(myApp)

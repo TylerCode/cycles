@@ -38,30 +38,40 @@ aspirational documentation (see "Docs vs. reality" below).
   `us.tylerc.cycles.appdata.xml`) — parked there deliberately rather than
   deleted, in case Flatpak gets revisited later.
 
-## ⚠️ Current build is broken
+## Build/runtime health (fixed 2026-07-10)
 
-`go build ./...` and `go vet ./...` fail right now on `main`:
+As of this date `go build`, `go vet`, `go test`, and a manual smoke-test run
+of the built binary are all clean. This section records what was actually
+wrong, in case similar bugs get reintroduced during the overhaul:
 
-```
-./settingsui.go:150:87: undefined: fyne.Color
-./settings.go:98:15: undefined: fyne.VariantLight
-./settings.go:100:15: undefined: fyne.VariantDark
-./settings.go:102:15: undefined: fyne.VariantDark
-```
-
-Root cause: `settings.go` and `settingsui.go` reference symbols that don't
-exist in vendored Fyne v2.4.2:
-- `fyne.Color` isn't a type in this Fyne version — it should be `color.Color`
-  from `image/color` (see how `theme.go` does it correctly).
-- `fyne.VariantLight` / `fyne.VariantDark` don't live in the `fyne` package —
-  they're `theme.VariantLight` / `theme.VariantDark` in `fyne.io/fyne/v2/theme`
-  (confirmed via `grep -rl VariantDark vendor/fyne.io/`).
-
-This was introduced along with the settings/theme system (`git log
-settings.go settingsui.go` for history) and appears to have never been
-verified with a clean build. **This is Phase 0, item 1 of the overhaul
-roadmap below — fix it before anything else.** Any agent asked to "add a
-feature" here should not assume `go build` currently succeeds.
+1. **Compile error**: `settings.go`/`settingsui.go` referenced `fyne.Color`
+   (not a real type — vendored Fyne v2.4.2 uses `color.Color` from
+   `image/color`, see `theme.go` for the correct pattern) and
+   `fyne.VariantLight`/`fyne.VariantDark` (those constants live in
+   `fyne.io/fyne/v2/theme`, not the `fyne` package itself).
+2. **Preferences silently didn't persist**: `main.go` called `app.New()`
+   instead of `app.NewWithID("us.tylerc.cycles")`. Fyne's Preferences API
+   (used by `settings.go` for save/load) requires a unique app ID or it logs
+   a warning and settings never actually hit disk — the "settings persist
+   between runs" feature was never true at runtime despite compiling and
+   passing unit tests. Only caught by actually launching the app.
+3. **Infinite recursion → stack overflow on startup**: `CustomTheme` in
+   `settingsui.go` (installed via `ApplyTheme()` →
+   `app.Settings().SetTheme(&CustomTheme{...})`) delegated its
+   `Color`/`Font`/`Icon`/`Size` methods to
+   `fyne.CurrentApp().Settings().Theme()` — but once installed, that call
+   returns the `CustomTheme` itself, so every color lookup recursed into
+   itself forever. Fixed by delegating to the stable `theme.DefaultTheme()`
+   base theme instead. This is why a build-clean / vet-clean / tests-passing
+   state is not sufficient proof the app works — **always smoke-test the
+   actual running binary** (`fyne.io/fyne/v2/test` covers widget
+   construction in unit tests, e.g. the `TestMain` in `memorytile_test.go`,
+   but not full app wiring like `ApplyTheme`).
+4. Version-string drift across `config.go` (0.6.0), `snap/snapcraft.yaml`
+   (was 0.4.1), and `.github/workflows/appimage.yml` (hardcoded 0.4.1 into
+   the artifact filename) — resolved by pinning snapcraft to 0.6.0 and
+   making the AppImage workflow derive `VERSION` from `config.go` at build
+   time instead of hardcoding it, so it can't drift again silently.
 
 ## Architecture (current)
 
@@ -71,8 +81,8 @@ Flat file-per-concern layout, no internal packages:
 |---|---|
 | `main.go` | Entry point: config/settings load, window+menu setup, tile grids, update goroutines |
 | `config.go` | `AppConfig` struct, defaults, CLI flag parsing (`--columns`, `--interval`, `--history`, `--logical`) |
-| `settings.go` | `Settings` struct — persisted via Fyne `Preferences` (theme, grid columns, history size, logical cores, update interval). **Currently broken**, see above |
-| `settingsui.go` | Settings dialog (Fyne form) + `CustomTheme` wrapper type. **Currently broken**, see above |
+| `settings.go` | `Settings` struct — persisted via Fyne `Preferences` (theme, grid columns, history size, logical cores, update interval) |
+| `settingsui.go` | Settings dialog (Fyne form) + `CustomTheme` wrapper type |
 | `theme.go` | Graph line colors per utilization band (green/yellow/red) x light/dark, `ApplyTheme()` |
 | `tile.go` | `CoreTile` — one CPU core's UI tile (labels + history graph) |
 | `memorytile.go` | `MemoryTile` — memory UI tile + byte-size/percent formatters |
@@ -114,8 +124,8 @@ Remaining docs, with caveats:
   machine with Snap access anymore") that's now inaccurate given the
   overhaul — left as-is since it's the owner's voice, not a factual claim.
 - `DEVELOPER_GUIDE.md` is the most accurate of the remaining docs and
-  matches the code layout well, but was written before the settings/theme
-  build breakage below — its "Testing Checklist" assumes a clean build.
+  matches the code layout well; its "Testing Checklist" now reflects
+  reality again since the build/runtime fixes above.
 - `CHANGELOG.md` is real version history, trust it for what shipped when.
 
 When in doubt, **trust the code and `git log`, not these docs.**
@@ -128,7 +138,7 @@ make build      # -> build/cycles
 make run        # build + run
 make dev        # unoptimized quick build
 make test       # go test -v ./...
-make check      # fmt + vet + test  (currently fails: vet error above)
+make check      # fmt + vet + test  (all green as of 2026-07-10)
 ```
 
 Native Go equivalents also work (`go build .`, `go test ./...`). System
@@ -137,10 +147,13 @@ package dependencies (X11/GL dev headers) are required to build at all — see
 per-distro package list.
 
 Test coverage exists for `config.go`, `graphics.go`, `info.go`,
-`memorytile.go`, `settings.go` (one `_test.go` each) — but note `go test`
-will hit the same compile error as `go build` while `settings.go`/
-`settingsui.go` are broken, so **no tests currently run at all**, not even
-the ones unrelated to settings.
+`memorytile.go`, `settings.go` (one `_test.go` each), all passing.
+`memorytile_test.go` has a package-level `TestMain` that boots a headless
+`fyne.io/fyne/v2/test` app — needed because widget constructors that call
+`theme.BackgroundColor()` (e.g. `NewMemoryTile`, and `NewCoreTile` if it
+ever gets tests) panic without a `fyne.CurrentApp()` in scope. Any new test
+that constructs a Fyne widget touching theme colors relies on that same
+`TestMain`, so keep it if you add or move test files.
 
 ## Conventions worth preserving
 
@@ -149,9 +162,10 @@ the ones unrelated to settings.
   `DEVELOPER_GUIDE.md` "Code Style Guidelines" for the fuller version the
   project has been trying to follow.
 - Version string lives in `config.go` (`DefaultConfig().Version`) and is
-  duplicated by hand into `CHANGELOG.md` and CI workflow filenames
-  (`appimage.yml` hardcodes `cycles-0.4.1-x86_64.AppImage` — already stale
-  against the 0.6.0 version in `config.go`, another drift example).
+  still duplicated by hand into `CHANGELOG.md` and `snap/snapcraft.yaml`
+  (kept in sync manually as of 2026-07-10 — no automation yet, so bumping
+  the version means updating both). The AppImage workflow now derives its
+  filename from `config.go` automatically, so that one can't drift again.
 - `vendor/` is intentionally committed (reproducible builds, offline CI) —
   don't `.gitignore` it or assume `go mod vendor` is optional when adding deps.
 
@@ -160,15 +174,20 @@ the ones unrelated to settings.
 The stated goal is to get the project working and clean again before
 attempting the larger UI overhaul. Roughly in order:
 
-**Phase 0 — get it building again**
-1. Fix the `fyne.Color` / `fyne.VariantLight` / `fyne.VariantDark` build break.
-2. Get `make check` green; confirm the existing test suite actually passes
-   (it's never run successfully — see build break above).
-3. Manually smoke-test the running app (tiles render, settings dialog opens
-   and persists, theme toggle works) — unverified in a long time.
-4. Resolve version-string drift: `config.go` says 0.6.0, `snap/snapcraft.yaml`
-   says 0.4.1, `.github/workflows/appimage.yml` hardcodes `0.4.1` into the
-   output filename.
+**Phase 0 — get it building again — done 2026-07-10**
+1. ~~Fix the `fyne.Color` / `fyne.VariantLight` / `fyne.VariantDark` build break.~~ Done.
+2. ~~Get `make check` green; confirm tests pass.~~ Done — also fixed three
+   latent test bugs uncovered once compilation succeeded (stale hardcoded
+   version/column expectations, a segfault from missing Fyne test-app
+   context, and inverted light/dark constant assumptions). See "Build/runtime
+   health" above.
+3. ~~Manually smoke-test the running app.~~ Done — this caught two runtime
+   bugs invisible to build/vet/test: preferences never actually persisting
+   (missing app ID) and an infinite-recursion stack overflow in `CustomTheme`
+   on startup. Both fixed; see "Build/runtime health" above.
+4. ~~Resolve version-string drift.~~ Done — `snap/snapcraft.yaml` bumped to
+   0.6.0, `.github/workflows/appimage.yml` now derives its version from
+   `config.go` instead of hardcoding it.
 
 **Phase 1 — surface cleanup** (docs done 2026-07-10; rest pending)
 5. ~~Purge stale planning docs.~~ Done.

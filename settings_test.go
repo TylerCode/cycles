@@ -3,6 +3,8 @@ package main
 import (
 	"testing"
 	"time"
+
+	"fyne.io/fyne/v2/theme"
 )
 
 func TestSettingsDefaults(t *testing.T) {
@@ -34,8 +36,8 @@ func TestSettingsDefaults(t *testing.T) {
 
 func TestGetThemeVariant(t *testing.T) {
 	tests := []struct {
-		theme    string
-		expected string // "light" or "dark"
+		themeName string
+		expected  string // "light" or "dark"
 	}{
 		{"light", "light"},
 		{"dark", "dark"},
@@ -44,20 +46,18 @@ func TestGetThemeVariant(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.theme, func(t *testing.T) {
-			// Create a settings object with the theme
+		t.Run(tt.themeName, func(t *testing.T) {
 			s := &Settings{
-				Theme: tt.theme,
+				Theme: tt.themeName,
 			}
 
 			variant := s.GetThemeVariant()
 
-			// Check if variant matches expected
-			if tt.expected == "light" && variant != 0 {
-				t.Errorf("Expected light theme variant for %s", tt.theme)
+			if tt.expected == "light" && variant != theme.VariantLight {
+				t.Errorf("Expected light theme variant for %s", tt.themeName)
 			}
-			if tt.expected == "dark" && variant != 1 {
-				t.Errorf("Expected dark theme variant for %s", tt.theme)
+			if tt.expected == "dark" && variant != theme.VariantDark {
+				t.Errorf("Expected dark theme variant for %s", tt.themeName)
 			}
 		})
 	}

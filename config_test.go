@@ -8,12 +8,12 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
 
-	if config.Version != "0.4.1" {
-		t.Errorf("Expected version 0.4.1, got %s", config.Version)
+	if config.Version != "0.6.0" {
+		t.Errorf("Expected version 0.6.0, got %s", config.Version)
 	}
 
-	if config.GridColumns != 4 {
-		t.Errorf("Expected 4 grid columns, got %d", config.GridColumns)
+	if config.GridColumns != 8 {
+		t.Errorf("Expected 8 grid columns, got %d", config.GridColumns)
 	}
 
 	if config.UpdateInterval != 2*time.Second {

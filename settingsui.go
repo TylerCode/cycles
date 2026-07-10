@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"strconv"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -147,18 +149,18 @@ type CustomTheme struct {
 	variant fyne.ThemeVariant
 }
 
-func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) fyne.Color {
-	return fyne.CurrentApp().Settings().Theme().Color(name, t.variant)
+func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	return theme.DefaultTheme().Color(name, t.variant)
 }
 
 func (t *CustomTheme) Font(style fyne.TextStyle) fyne.Resource {
-	return fyne.CurrentApp().Settings().Theme().Font(style)
+	return theme.DefaultTheme().Font(style)
 }
 
 func (t *CustomTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
-	return fyne.CurrentApp().Settings().Theme().Icon(name)
+	return theme.DefaultTheme().Icon(name)
 }
 
 func (t *CustomTheme) Size(name fyne.ThemeSizeName) float32 {
-	return fyne.CurrentApp().Settings().Theme().Size(name)
+	return theme.DefaultTheme().Size(name)
 }

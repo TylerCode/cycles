@@ -24,6 +24,9 @@ jobs:
         go mod download
         GOOS=linux go build -o cycles
 
+    - name: Determine version
+      run: echo "VERSION=$(grep 'Version:' config.go | cut -d'"' -f2)" >> "$GITHUB_ENV"
+
     - name: Prepare AppDir
       run: |
         mkdir AppDir
@@ -43,10 +46,10 @@ jobs:
         
     - name: Build AppImage
       run: |
-        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/ cycles-0.4.1-x86_64.AppImage
+        ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir/ cycles-${{ env.VERSION }}-x86_64.AppImage
 
     - name: Upload AppImage
       uses: actions/upload-artifact@v4
       with:
         name: Cycles-AppImage
-        path: cycles-0.4.1-x86_64.AppImage
+        path: cycles-${{ env.VERSION }}-x86_64.AppImage
