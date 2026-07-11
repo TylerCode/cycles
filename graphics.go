@@ -268,7 +268,8 @@ func formatThreadsValue(threads int) string {
 	return fmt.Sprintf("%d", threads)
 }
 
-// formatPeakCoreValue formats the CPU stats strip's peak core indicator.
-func formatPeakCoreValue(coreIndex int, util float64) string {
-	return fmt.Sprintf("Core %d · %.1f%%", coreIndex, util)
+// formatPeakCoreValue formats the CPU stats strip's peak core indicator
+// (the core index only; the utilization is shown separately via formatUtilLabel).
+func formatPeakCoreValue(coreIndex int) string {
+	return fmt.Sprintf("Core %d", coreIndex)
 }

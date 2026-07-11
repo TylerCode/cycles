@@ -1,6 +1,8 @@
 package main
 
 import (
+	"image/color"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -24,15 +26,17 @@ type CPUTab struct {
 	Content fyne.CanvasObject
 	Cores   []*CoreState
 
-	threadsLabel *canvas.Text
-	avgLabel     *canvas.Text
-	peakLabel    *canvas.Text
-	clockLabel   *canvas.Text
+	threadsLabel  *canvas.Text
+	avgLabel      *canvas.Text
+	peakLabel     *canvas.Text
+	peakUtilLabel *canvas.Text
+	clockLabel    *canvas.Text
 
-	threadsValue *canvas.Text
-	avgValue     *canvas.Text
-	peakValue    *canvas.Text
-	clockValue   *canvas.Text
+	threadsValue  *canvas.Text
+	avgValue      *canvas.Text
+	peakValue     *canvas.Text
+	peakUtilValue *canvas.Text
+	clockValue    *canvas.Text
 
 	tilesBtn *widget.Button
 	listBtn  *widget.Button
@@ -96,13 +100,20 @@ func (t *CPUTab) buildStatsStrip() fyne.CanvasObject {
 		return container.NewVBox(labelText, valueText), labelText, valueText
 	}
 
-	var threads, avg, peak, clock fyne.CanvasObject
+	gap := func() fyne.CanvasObject {
+		r := canvas.NewRectangle(color.Transparent)
+		r.SetMinSize(fyne.NewSize(12, 1))
+		return r
+	}
+
+	var threads, avg, peak, peakUtil, clock fyne.CanvasObject
 	threads, t.threadsLabel, t.threadsValue = stat("Threads")
 	avg, t.avgLabel, t.avgValue = stat("Avg util")
 	peak, t.peakLabel, t.peakValue = stat("Peak core")
+	peakUtil, t.peakUtilLabel, t.peakUtilValue = stat("Peak util")
 	clock, t.clockLabel, t.clockValue = stat("Max clock")
 
-	return container.NewHBox(threads, avg, peak, clock)
+	return container.NewHBox(threads, gap(), avg, gap(), peak, gap(), peakUtil, gap(), clock)
 }
 
 func (t *CPUTab) buildViewToggle() fyne.CanvasObject {
@@ -141,8 +152,11 @@ func (t *CPUTab) UpdateStats(stats CPUAggregateStats) {
 	t.avgValue.Text = formatUtilLabel(stats.AvgUtil)
 	t.avgValue.Refresh()
 
-	t.peakValue.Text = formatPeakCoreValue(stats.PeakCoreIndex, stats.PeakCoreUtil)
+	t.peakValue.Text = formatPeakCoreValue(stats.PeakCoreIndex)
 	t.peakValue.Refresh()
+
+	t.peakUtilValue.Text = formatUtilLabel(stats.PeakCoreUtil)
+	t.peakUtilValue.Refresh()
 
 	t.clockValue.Text = formatClockLabel(stats.MaxClock)
 	t.clockValue.Refresh()
@@ -152,11 +166,11 @@ func (t *CPUTab) UpdateStats(stats CPUAggregateStats) {
 // every core's tile/row. Needed because canvas.Text/Rectangle primitives
 // only read theme colors once, at construction — see CoreTile.RefreshTheme.
 func (t *CPUTab) RefreshTheme() {
-	for _, label := range []*canvas.Text{t.threadsLabel, t.avgLabel, t.peakLabel, t.clockLabel} {
+	for _, label := range []*canvas.Text{t.threadsLabel, t.avgLabel, t.peakLabel, t.peakUtilLabel, t.clockLabel} {
 		label.Color = theme.PlaceHolderColor()
 		label.Refresh()
 	}
-	for _, value := range []*canvas.Text{t.threadsValue, t.avgValue, t.peakValue, t.clockValue} {
+	for _, value := range []*canvas.Text{t.threadsValue, t.avgValue, t.peakValue, t.peakUtilValue, t.clockValue} {
 		value.Color = theme.ForegroundColor()
 		value.Refresh()
 	}

@@ -93,8 +93,8 @@ func TestFormatThreadsValue(t *testing.T) {
 }
 
 func TestFormatPeakCoreValue(t *testing.T) {
-	if got := formatPeakCoreValue(16, 90.5); got != "Core 16 · 90.5%" {
-		t.Errorf("formatPeakCoreValue(16, 90.5) = %s; want %q", got, "Core 16 · 90.5%")
+	if got := formatPeakCoreValue(16); got != "Core 16" {
+		t.Errorf("formatPeakCoreValue(16) = %s; want %q", got, "Core 16")
 	}
 }
 
