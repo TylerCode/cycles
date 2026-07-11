@@ -1,4 +1,7 @@
 [![Build Snap](https://snapcraft.io/tylercode-cycles/badge.svg)](https://snapcraft.io/tylercode-cycles)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TylerCode_cycles&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=TylerCode_cycles)
+
 [![Build AppImage](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml/badge.svg)](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml)
 
 # cycles
