@@ -82,7 +82,6 @@ func main() {
 	)
 
 	myWindow.SetContent(tabs)
-	myWindow.Resize(fyne.NewSize(1280, 800))
 
 	// canvas.Text/Rectangle primitives (used throughout the CPU/Memory tabs
 	// for custom-colored drawing) only read theme colors once, at
@@ -115,5 +114,13 @@ func main() {
 		}
 	}()
 
-	myWindow.ShowAndRun()
+	// Show the window first so the OS native handle and canvas exist before
+	// Resize is called. Calling Resize on an unshown window in Fyne v2.4.x
+	// sets the OS window size but the layout engine hasn't yet done a full
+	// pass, so content renders at its minimum size in the corner. Calling
+	// Resize after Show (but before Run) fires on a live canvas and forces
+	// the content to properly fill the window from the first frame.
+	myWindow.Show()
+	myWindow.Resize(fyne.NewSize(1280, 800))
+	myApp.Run()
 }

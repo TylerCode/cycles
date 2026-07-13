@@ -182,37 +182,19 @@ func GetMemoryInfoDetailed() (MemoryInfo, SwapInfo, error) {
 func parseMemInfo(r io.Reader) (MemoryInfo, SwapInfo, error) {
 	scanner := bufio.NewScanner(r)
 	var total, free, cached, buffers, swapTotal, swapFree uint64
+	targets := map[string]*uint64{
+		"MemTotal:":  &total,
+		"MemFree:":   &free,
+		"Cached:":    &cached,
+		"Buffers:":   &buffers,
+		"SwapTotal:": &swapTotal,
+		"SwapFree:":  &swapFree,
+	}
 	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "MemTotal:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				total, _ = strconv.ParseUint(parts[1], 10, 64)
-			}
-		} else if strings.HasPrefix(line, "MemFree:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				free, _ = strconv.ParseUint(parts[1], 10, 64)
-			}
-		} else if strings.HasPrefix(line, "Cached:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				cached, _ = strconv.ParseUint(parts[1], 10, 64)
-			}
-		} else if strings.HasPrefix(line, "Buffers:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				buffers, _ = strconv.ParseUint(parts[1], 10, 64)
-			}
-		} else if strings.HasPrefix(line, "SwapTotal:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				swapTotal, _ = strconv.ParseUint(parts[1], 10, 64)
-			}
-		} else if strings.HasPrefix(line, "SwapFree:") {
-			parts := strings.Fields(line)
-			if len(parts) == 3 {
-				swapFree, _ = strconv.ParseUint(parts[1], 10, 64)
+		parts := strings.Fields(scanner.Text())
+		if len(parts) == 3 {
+			if ptr, ok := targets[parts[0]]; ok {
+				*ptr, _ = strconv.ParseUint(parts[1], 10, 64)
 			}
 		}
 	}

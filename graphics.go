@@ -68,45 +68,28 @@ func DrawAreaChart(w, h int, primary, secondary []float64) image.Image {
 	primaryColor := GetSeriesColor("blue")
 	fillColor := color.NRGBA{R: primaryColor.R, G: primaryColor.G, B: primaryColor.B, A: 40}
 
-	valueAt := func(series []float64, x int) float64 {
-		if len(series) < 2 {
-			if len(series) == 1 {
-				return series[0]
-			}
-			return 0
-		}
-		xStep := float64(w-1) / float64(len(series)-1)
-		pos := float64(x) / xStep
-		i := int(pos)
-		if i >= len(series)-1 {
-			return series[len(series)-1]
-		}
-		frac := pos - float64(i)
-		return series[i]*(1-frac) + series[i+1]*frac
-	}
-
 	yAt := func(v float64) int {
 		y := h - 1 - int(v/100*float64(h-1))
 		return max(0, min(y, h-1))
 	}
 
 	for x := 0; x < w; x++ {
-		top := yAt(valueAt(primary, x))
+		top := yAt(interpolateSeries(primary, x, w))
 		for y := top; y < h; y++ {
 			dst.Set(x, y, fillColor)
 		}
 	}
 	for i := 0; i < w-1; i++ {
-		y1 := yAt(valueAt(primary, i))
-		y2 := yAt(valueAt(primary, i+1))
+		y1 := yAt(interpolateSeries(primary, i, w))
+		y2 := yAt(interpolateSeries(primary, i+1, w))
 		drawLineWithEffect(dst, i, y1, i+1, y2, primaryColor)
 	}
 
 	if len(secondary) >= 2 {
 		secondaryColor := GetSeriesColor("yellow")
 		for i := 0; i < w-1; i++ {
-			y1 := yAt(valueAt(secondary, i))
-			y2 := yAt(valueAt(secondary, i+1))
+			y1 := yAt(interpolateSeries(secondary, i, w))
+			y2 := yAt(interpolateSeries(secondary, i+1, w))
 			drawLineWithEffect(dst, i, y1, i+1, y2, secondaryColor)
 		}
 	}
@@ -145,20 +128,8 @@ func DrawRadialGauge(w, h int, percent float64, ringColor, trackColor color.RGBA
 		for x := 0; x < w; x++ {
 			dx := float64(x) + 0.5 - cx
 			dy := float64(y) + 0.5 - cy
-			dist := math.Hypot(dx, dy)
-			if dist < inner || dist > outer {
-				continue
-			}
-
-			angle := math.Atan2(dx, -dy)
-			if angle < 0 {
-				angle += 2 * math.Pi
-			}
-
-			if angle <= sweep {
-				dst.Set(x, y, ringColor)
-			} else {
-				dst.Set(x, y, trackColor)
+			if c, ok := gaugeRingColor(dx, dy, inner, outer, sweep, ringColor, trackColor); ok {
+				dst.Set(x, y, c)
 			}
 		}
 	}
@@ -231,6 +202,44 @@ func drawLine(img *image.RGBA, x1, y1, x2, y2 int, col color.Color) {
 			y1 += sy
 		}
 	}
+}
+
+// interpolateSeries returns the interpolated value of series at pixel column x
+// within a canvas of width w. Handles empty or single-element series gracefully.
+func interpolateSeries(series []float64, x, w int) float64 {
+	if len(series) == 0 {
+		return 0
+	}
+	if len(series) == 1 {
+		return series[0]
+	}
+	xStep := float64(w-1) / float64(len(series)-1)
+	pos := float64(x) / xStep
+	i := int(pos)
+	if i >= len(series)-1 {
+		return series[len(series)-1]
+	}
+	frac := pos - float64(i)
+	return series[i]*(1-frac) + series[i+1]*frac
+}
+
+// gaugeRingColor returns the color for a gauge ring pixel given its displacement
+// (dx, dy) from the ring centre, the ring geometry (inner/outer radii), and the
+// filled sweep angle. Returns (color, true) if the pixel falls inside the ring,
+// or (zero, false) if it is outside.
+func gaugeRingColor(dx, dy, inner, outer, sweep float64, ringColor, trackColor color.RGBA) (color.RGBA, bool) {
+	dist := math.Hypot(dx, dy)
+	if dist < inner || dist > outer {
+		return color.RGBA{}, false
+	}
+	angle := math.Atan2(dx, -dy)
+	if angle < 0 {
+		angle += 2 * math.Pi
+	}
+	if angle <= sweep {
+		return ringColor, true
+	}
+	return trackColor, true
 }
 
 // abs returns the absolute value of an integer
