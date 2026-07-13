@@ -7,7 +7,8 @@
 # cycles
 Desktop CPU Monitor I threw together while trying to debug some issues with my computer. Currently working on a small overhaul of the UI. 
 
-![image](https://github.com/TylerCode/cycles/assets/18288340/36332a79-6882-4204-ba6d-51d061798229)
+<img width="1299" height="433" alt="banner_0 8 1" src="https://github.com/user-attachments/assets/fa337780-449f-4bbf-9e53-2c04014cdafd" />
+
 
 
 ## Overview
@@ -15,9 +16,7 @@ This application provides a real-time graphical representation of CPU utilizatio
 
 The ultimate goal is to have something more akin to the performance tab in Windows Task Manager. 
 
-![image](https://github.com/TylerCode/cycles/assets/18288340/460582ca-6260-4148-a19a-587ae03dc87f)
-
-
+<img width="1301" height="855" alt="screenshot_dark_0 8 1" src="https://github.com/user-attachments/assets/e17f5a88-0e81-4a6f-8faa-9fdacf0270dd" />
 
 ## Features
 - Displays CPU core utilization and frequency in real-time
