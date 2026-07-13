@@ -1,0 +1,160 @@
+name: Release
+
+# Builds release artifacts and publishes them to GitHub Releases.
+#
+# Triggers on version tag pushes (e.g. v0.9.0). Use workflow_dispatch from
+# the Actions tab to do a test build without creating a release.
+#
+# Artifacts: linux-amd64 tarball, AppImage.
+# Planned:   .deb (see placeholder job comment below).
+# Out of scope: Snap (handled by Launchpad auto-builds).
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write # required to create releases and upload assets
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Gate: fmt + vet + test must pass before anything gets built.
+  # ---------------------------------------------------------------------------
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+
+      - name: Check (fmt + vet + test)
+        run: make check
+
+  # ---------------------------------------------------------------------------
+  # Linux binary tarball (amd64).
+  # ---------------------------------------------------------------------------
+  build-binary:
+    name: Build binary tarball
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+
+      - name: Build
+        run: make release
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          tar -czf dist/cycles-${{ github.ref_name }}-linux-amd64.tar.gz \
+            --transform 's|^build/||' \
+            build/cycles README.md LICENSE
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-tarball
+          path: dist/*
+
+  # ---------------------------------------------------------------------------
+  # AppImage (x86_64).
+  # ---------------------------------------------------------------------------
+  build-appimage:
+    name: Build AppImage
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+
+      - name: Build
+        run: make release
+
+      - name: Prepare AppDir
+        run: |
+          mkdir -p AppDir
+          cp build/cycles AppDir/
+          cp appimage/tylercode-cycles.desktop AppDir/
+          cp appimage/icon.png AppDir/
+          printf '#!/bin/sh\nexec "$APPDIR/cycles"\n' > AppDir/AppRun
+          chmod +x AppDir/AppRun
+
+      - name: Download appimagetool
+        run: |
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+
+      - name: Build AppImage
+        run: |
+          mkdir -p dist
+          ./appimagetool-x86_64.AppImage --appimage-extract-and-run \
+            AppDir/ dist/cycles-${{ github.ref_name }}-x86_64.AppImage
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage
+          path: dist/*
+
+  # ---------------------------------------------------------------------------
+  # .deb package — not yet implemented.
+  #
+  # When ready, add a build-deb job here. Suggested approach: fpm
+  # (https://github.com/jordansissel/fpm) wraps the binary into a .deb
+  # without needing a full Debian packaging setup.
+  #
+  # Rough steps:
+  #   - gem install fpm
+  #   - make release
+  #   - fpm -s dir -t deb -n cycles -v <version> \
+  #       --description "CPU/memory monitor" \
+  #       build/cycles=/usr/local/bin/cycles
+  #
+  # Then add build-deb to the `needs` list in the release job below.
+  # ---------------------------------------------------------------------------
+
+  # ---------------------------------------------------------------------------
+  # Collect artifacts and publish the GitHub Release.
+  # Skipped on workflow_dispatch — only runs for real tag pushes.
+  # ---------------------------------------------------------------------------
+  release:
+    name: Publish Release
+    needs: [build-binary, build-appimage]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
