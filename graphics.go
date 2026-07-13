@@ -161,9 +161,9 @@ func drawLineWithEffect(dst *image.RGBA, x1, y1, x2, y2 int, col color.RGBA) {
 			drawLine(dst, x1+o.dx, y1+o.dy, x2+o.dx, y2+o.dy, glow)
 		}
 	} else {
-		shadow := color.NRGBA{A: 160}
-		drawLine(dst, x1+1, y1+2, x2+1, y2+2, shadow)
-		drawLine(dst, x1+2, y1+1, x2+2, y2+1, shadow)
+		shadow := color.NRGBA{A: 80}
+		drawLine(dst, x1, y1+2, x2, y2+2, shadow)
+		drawLine(dst, x1+1, y1+1, x2+1, y2+1, shadow)
 	}
 	drawLine(dst, x1, y1, x2, y2, col)
 }
