@@ -20,7 +20,7 @@ var coreTileSize = fyne.NewSize(168, 112)
 
 // CPUTab builds and owns the whole CPU tab: an aggregate stats strip, a
 // Tiles/List view toggle, and both view containers (kept alive
-// simultaneously — see CoreState — so toggling views never shows stale
+// simultaneously - see CoreState - so toggling views never shows stale
 // data).
 type CPUTab struct {
 	Content fyne.CanvasObject
@@ -67,7 +67,7 @@ func NewCPUTab(numCores int, initialView string, onViewChange func(view string))
 
 	// Split rows into two side-by-side column groups, matching the mockup's
 	// list view (this stays two columns regardless of window width, per
-	// design decision). HSplit gives them a visible divider — without one,
+	// design decision). HSplit gives them a visible divider - without one,
 	// the right column's label sits flush against the left column's
 	// trailing clock/sparkline group, reading as one merged row.
 	half := (numCores + 1) / 2
@@ -164,7 +164,7 @@ func (t *CPUTab) UpdateStats(stats CPUAggregateStats) {
 
 // RefreshTheme re-applies theme-derived colors across the stats strip and
 // every core's tile/row. Needed because canvas.Text/Rectangle primitives
-// only read theme colors once, at construction — see CoreTile.RefreshTheme.
+// only read theme colors once, at construction - see CoreTile.RefreshTheme.
 func (t *CPUTab) RefreshTheme() {
 	for _, label := range []*canvas.Text{t.threadsLabel, t.avgLabel, t.peakLabel, t.peakUtilLabel, t.clockLabel} {
 		label.Color = theme.PlaceHolderColor()

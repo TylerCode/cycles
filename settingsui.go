@@ -90,7 +90,7 @@ func ShowSettingsDialog(settings *Settings, window fyne.Window, onSave func()) {
 
 	// settingsDialog is built without Fyne's own Confirm/Dismiss button row
 	// (dialog.NewCustomConfirm) since that stacks a second button row below
-	// the content — here Reset/Cancel/Save are laid out together as a single
+	// the content - here Reset/Cancel/Save are laid out together as a single
 	// footer row instead, which is what a normal dialog footer looks like.
 	var settingsDialog *dialog.CustomDialog
 

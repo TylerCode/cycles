@@ -75,7 +75,7 @@ func GetSeriesColor(series string) color.RGBA {
 
 // isDarkTheme checks if the current theme variant is dark. It reads the
 // resolved variant from Settings (which accounts for "auto"/OS-detected
-// preference) rather than comparing theme instances — CustomTheme is always
+// preference) rather than comparing theme instances - CustomTheme is always
 // the app's active theme.Theme(), so a direct comparison against
 // theme.LightTheme() never matches and previously made this always report
 // dark, regardless of the user's actual selection.

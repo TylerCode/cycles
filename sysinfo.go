@@ -164,7 +164,7 @@ func UpdateCPUInfo(cores []*CoreState, historySize int, onStats func(CPUAggregat
 // from /proc/meminfo.
 //
 // Used is computed as total-free-cached-buffers (rather than total-available)
-// so that Used+Cached+Buffers+Free sums to Total — required for the memory
+// so that Used+Cached+Buffers+Free sums to Total - required for the memory
 // breakdown bars, which visualize those four components as parts of a whole.
 func GetMemoryInfoDetailed() (MemoryInfo, SwapInfo, error) {
 	file, err := os.Open("/proc/meminfo")

@@ -85,7 +85,7 @@ func main() {
 
 	// canvas.Text/Rectangle primitives (used throughout the CPU/Memory tabs
 	// for custom-colored drawing) only read theme colors once, at
-	// construction — unlike built-in widgets, they don't repaint themselves
+	// construction - unlike built-in widgets, they don't repaint themselves
 	// when the app theme changes live. Listen for theme changes and push a
 	// refresh through both tabs so switching themes doesn't require a
 	// restart.

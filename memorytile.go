@@ -72,7 +72,7 @@ func (r *breakdownRow) update(percent float64, value, percentText string) {
 	r.percentText.Refresh()
 }
 
-// refreshTheme re-applies theme-derived colors — see CoreTile.RefreshTheme
+// refreshTheme re-applies theme-derived colors - see CoreTile.RefreshTheme
 // for why this is needed.
 func (r *breakdownRow) refreshTheme() {
 	r.labelText.Color = theme.ForegroundColor()
@@ -88,7 +88,7 @@ func (r *breakdownRow) refreshTheme() {
 
 // MemoryDashboard is the Memory tab's whole layout: a radial usage gauge,
 // used/cached/buffers/free/swap breakdown rows, and a full-width memory+swap
-// history chart. It replaces the old copy-pasted single grid tile — memory
+// history chart. It replaces the old copy-pasted single grid tile - memory
 // is one aggregate metric with named sub-components, not a repeating
 // collection, so it gets a dashboard rather than a tile grid.
 type MemoryDashboard struct {
@@ -230,7 +230,7 @@ func (d *MemoryDashboard) Update(mem MemoryInfo, swap SwapInfo, usagePercent, sw
 
 // RefreshTheme re-applies theme-derived colors across the whole dashboard.
 // Needed because canvas.Text/Rectangle primitives only read theme colors
-// once, at construction — see CoreTile.RefreshTheme.
+// once, at construction - see CoreTile.RefreshTheme.
 func (d *MemoryDashboard) RefreshTheme() {
 	d.gaugePercentText.Color = theme.ForegroundColor()
 	d.gaugePercentText.Refresh()

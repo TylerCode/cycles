@@ -13,7 +13,7 @@ type Settings struct {
 
 	// Display settings
 	Theme        string // "auto", "light", "dark"
-	ViewMode     string // "tiles", "list" — CPU tab view
+	ViewMode     string // "tiles", "list" - CPU tab view
 	HistorySize  int
 	LogicalCores bool
 

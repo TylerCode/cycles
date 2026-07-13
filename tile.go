@@ -11,7 +11,7 @@ import (
 
 // CoreState holds one CPU core's live data. It's the single source of truth
 // that both the Tiles view (CoreTile) and the List view (CoreListRow)
-// render from, so switching between views never shows stale data — whichever
+// render from, so switching between views never shows stale data - whichever
 // widgets exist for a core are refreshed together on every update.
 type CoreState struct {
 	Index       int
@@ -222,7 +222,7 @@ func (r *CoreListRow) refresh() {
 	r.sparkline.Refresh()
 }
 
-// RefreshTheme re-applies theme-derived colors — see CoreTile.RefreshTheme
+// RefreshTheme re-applies theme-derived colors - see CoreTile.RefreshTheme
 // for why this is needed.
 func (r *CoreListRow) RefreshTheme() {
 	r.coreLabel.Color = theme.ForegroundColor()

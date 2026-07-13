@@ -138,7 +138,7 @@ func DrawRadialGauge(w, h int, percent float64, ringColor, trackColor color.RGBA
 }
 
 // glowOffsets are the pixel offsets used to build a rounded halo around a
-// line in dark mode — a ring at radius 1 and a fainter, wider ring at
+// line in dark mode - a ring at radius 1 and a fainter, wider ring at
 // radius 2, rather than just 4 single-pixel taps, so the glow reads as a
 // soft bloom instead of a faint cross.
 var glowOffsets = []struct {
