@@ -2,6 +2,9 @@ name: tylercode-cycles
 version: '0.8.1'
 summary: A simple, theme-aware, CPU information tool
 description: |
+  This app is "early access" still.
+
+  This application displays logical/physical (configurable) cores in an easy to read display. Shows some memory information as well and is just meant to be a basic tool. The end goal is something akin to a basic "Task Manager" for linux.
 icon: snap/gui/icon.png
 
 grade: stable
@@ -27,7 +30,7 @@ parts:
     source: .
     plugin: go
     build-snaps:
-      - go/1.21/stable
+      - go/1.22/stable
     build-packages:
       - libgl1-mesa-dev
       - libx11-dev
