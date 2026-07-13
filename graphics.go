@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-// DrawSparkline renders a utilization history line into an image sized w×h.
+// DrawSparkline renders a utilization history line into an image sized wxh.
 // Unlike the old fixed-bitmap DrawGraph, w and h are the actual pixel size
 // the sparkline is being displayed at (driven by canvas.Raster's generate
 // callback), so it always renders crisply at its real on-screen size.

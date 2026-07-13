@@ -113,7 +113,7 @@ type MemoryDashboard struct {
 }
 
 // legendItem is a small color swatch + label used in the history chart's
-// legend (e.g. "■ Memory").
+// legend (e.g. "* Memory").
 type legendItem struct {
 	swatch    *canvas.Rectangle
 	labelText *canvas.Text
