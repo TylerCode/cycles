@@ -2,7 +2,7 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=TylerCode_cycles&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=TylerCode_cycles)
 
-[![Build AppImage](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml/badge.svg)](https://github.com/TylerCode/cycles/actions/workflows/appimage.yml)
+[![Release](https://github.com/TylerCode/cycles/actions/workflows/release.yml/badge.svg)](https://github.com/TylerCode/cycles/actions/workflows/release.yml)
 
 # cycles
 Desktop CPU Monitor I threw together while trying to debug some issues with my computer. Currently working on a small overhaul of the UI. 
