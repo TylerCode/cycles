@@ -180,4 +180,4 @@ MIT
 
 ## Acknowledgments
 - Fyne team for an incredible cross-platform ui kit.
-- The [`gopsutil`](https://github.com/shirou/gopsutil) library for system information access. 
+- The [gopsutil](https://github.com/shirou/gopsutil) library for system information access. 
